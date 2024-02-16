@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% if user.is_authenticated and perms.planning.can_create_event%}
+    {% if 'meeting_room' in form.fields %}
+        <form action="/planning/event_create/meeting_room/" method="post">
+    {% else %}
+       <form action="/planning/event_create/room/" method="post">
+    {% endif %}
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+{% else %}
+    Вы не авторизированны
+{% endif %}
+</body>
+</html>

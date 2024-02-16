@@ -1,0 +1,141 @@
+<html>
+<head>
+    <style>
+        table, th, td {
+          border:1px solid black;
+        }
+        .events_info {
+            margin-top: 10%;
+        }
+    </style>
+</head>
+<body>
+<div>
+    {% block content %}
+    {% if user.is_authenticated %}
+    {{ user.username }}
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Log Out</button>
+    </form>
+    {% else %}
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label for="email">E-mail: </label>
+        <input type="email" id="email" name="email" required/>
+        <label for="pass">Пароль: </label>
+        <input type="password" id="pass" name="pass" required/>
+        <input type="submit">
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+    {% endif %}
+    {% endblock %}
+</div>
+<div>
+    {% if user.is_authenticated and perms.planning.can_create_event%}
+    <button type="submit"><a href="/planning/choice_room/">Создать мероприятие</a>
+    </button>
+    {% endif %}
+</div>
+<div class="events_info">
+    {% if upcoming_events %}
+    <h3>Текущие и предстоящие мероприятия</h3>
+    <table style="width:100%">
+        <tr>
+            <th>Название</th>
+            <th>Организатор</th>
+            <th>Место проведения</th>
+            <th>Свободных мест</th>
+            <th>Время начала</th>
+            <th>Время конца</th>
+            {% if user.is_authenticated %}
+            <th>
+                Запись
+            </th>
+            {% endif %}
+        </tr>
+        {% for event in upcoming_events.all %}
+        <tr>
+            <td>
+                {{event.name}}
+            </td>
+            <td>
+                {{event.organizer}}
+            </td>
+            <td>
+                {% if event.room is not None%}
+                    {{event.room.name}}
+                {% else %}
+                    {{event.meeting_room.name}}
+                {% endif %}
+            </td>
+            <td>
+                {{event.free_capacity}}
+            </td>
+            <td>
+                {{event.start|date:'Y-m-d H:i'}}
+            </td>
+            <td>
+                {{event.end|date:'Y-m-d H:i'}}
+            </td>
+            {% if user.is_authenticated %}
+            <td>
+                {% if user in event.visitors.all %}
+                    <a href="/planning/event_out/{{event.id}}">Отказаться от записи</a>
+                {% else %}
+                    {% if event.free_capacity %}
+                        <a href="/planning/event_sign/{{event.id}}">Записаться</a>
+                    {% else %}
+                        Нет мест для записи
+                    {% endif %}
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Планируемых мероприятий нет.</p>
+    {% endif %}
+    {% if old_events %}
+    <h3>Последние 5 мероприятий</h3>
+    <table style="width:100%">
+        <tr>
+            <th>Название</th>
+            <th>Организатор</th>
+            <th>Место проведения</th>
+            <th>Участников</th>
+            <th>Время начала</th>
+            <th>Время конца</th>
+        </tr>
+        {% for event in old_events.all %}
+        <tr>
+            <td>
+                {{event.name}}
+            </td>
+            <td>
+                {{event.organizer}}
+            </td>
+            <td>
+                {% if event.room is not None%}
+                    {{event.room.name}}
+                {% else %}
+                    {{event.meeting_room.name}}
+                {% endif %}
+            </td>
+            <td>
+                {{event.event_visitors_counts}}
+            </td>
+            <td>
+                {{event.start|date:'Y-m-d H:i'}}
+            </td>
+            <td>
+                {{event.end|date:'Y-m-d H:i'}}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+</body>
+</html>

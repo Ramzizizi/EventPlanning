@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -24,6 +27,13 @@ class CustomUser(AbstractUser):
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = ["username", "date_of_birth"]
 
+    def save(self, *args, **kwargs):
+        if self.password and not self.password.startswith(
+            ("pbkdf2_sha256$", "bcrypt$", "argon2")
+        ):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
 
 class Place(models.Model):
     """
@@ -34,26 +44,20 @@ class Place(models.Model):
     seat_capacity = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
 
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.name
+
 
 class Room(Place):
     """
-    Моедль комнаты
+    Модель комнаты
     """
 
     # добавление полей
     sofa_count = models.IntegerField(default=0)
     seat_count = models.IntegerField(default=0)
-
-    # создание параметра
-    @property
-    def free_capacity(self):
-        """
-        Функция подсчёта свободных мест в комнате
-        """
-        # получение всех ивентов в этой комнате
-        events = Event.objects.filter(room__pk=self.pk).all()
-        # нахождение числа свободных мест
-        return self.seat_capacity - sum(i.event_capacity for i in events)
 
 
 class MeetingRoom(Place):
@@ -66,26 +70,14 @@ class MeetingRoom(Place):
     projects_count = models.IntegerField(default=0)
     entrances_count = models.IntegerField(default=0)
 
-    # создание параметра
-    @property
-    def free_capacity(self):
-        """
-        Функция подсчёта свободных мест в комнате
-        """
-        # получение всех ивентов в этой комнате
-        events = Event.objects.filter(meeting_room__pk=self.pk).all()
-        # нахождение числа свободных мест
-        return self.seat_capacity - sum(i.event_capacity for i in events)
-
 
 class EventStatus(models.IntegerChoices):
     """
     Класс для определения состояния ивента
     """
 
-    PastEvent = 1
-    CurrentEvent = 2
-    UpComingEvent = 3
+    NotActiveEvent = 1
+    ActiveEvent = 2
 
 
 class Event(models.Model):
@@ -94,31 +86,64 @@ class Event(models.Model):
     """
 
     # задание параметров
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name="Название")
     organizer: CustomUser = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, editable=False, related_name="Organizer"
+        CustomUser,
+        on_delete=models.CASCADE,
+        editable=False,
+        related_name="Organizer",
+        verbose_name="Организатор",
     )
     visitors: CustomUser = models.ManyToManyField(
-        CustomUser, related_name="Visitor", editable=False
+        CustomUser, related_name="Visitor", verbose_name="Посетители"
     )
-    event_capacity = models.IntegerField(default=0)
-    start = models.DateTimeField("Start event date and time", blank=False, null=False)
-    end = models.DateTimeField("End event date and time", blank=False, null=False)
+    event_capacity = models.IntegerField(
+        default=0, verbose_name="Количество участников"
+    )
+    start = models.DateTimeField(
+        "Время начала",
+        blank=False,
+        null=False,
+    )
+    end = models.DateTimeField("Время конца", blank=False, null=False)
     room: Room = models.ForeignKey(
-        Room, on_delete=models.CASCADE, blank=True, null=True
+        Room, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Комната"
     )
     meeting_room: MeetingRoom = models.ForeignKey(
-        MeetingRoom, on_delete=models.CASCADE, blank=True, null=True
+        MeetingRoom, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Зал"
     )
     event_status: EventStatus = models.IntegerField(
-        choices=EventStatus, default=EventStatus.UpComingEvent
+        choices=EventStatus,
+        default=EventStatus.ActiveEvent,
+        verbose_name="Статус мероприятия",
     )
+
+    objects = models.Manager()
+
+    @property
+    def free_capacity(self):
+        return self.event_capacity - self.visitors.count()
+
+    @property
+    def event_visitors_counts(self):
+        return self.visitors.count()
+
+    @property
+    def check_status(self):
+        if self.end < localtime():
+            self.event_status = EventStatus.NotActiveEvent
+            self.save()
+        return None
 
     # функция вызывающая при сохранении для валидации введенных данных
     def clean(self):
         """
         Валидация уже введенных данных
         """
+        if not self.event_capacity:
+            raise ValidationError("Need visitors")
+        if type(self.end) != datetime or type(self.start) != datetime:
+            raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
         if self.end < self.start:
             raise ValidationError("Event end can't be newer the he start")
@@ -131,16 +156,27 @@ class Event(models.Model):
             raise ValidationError(
                 "Event start date and time can't be older than the current date and time"
             )
-        # проверка на кол-во свободных мест в комнате
-        if self.room is not None:
-            place = self.room
-            events = Event.objects.filter(room__pk=place.pk).exclude(pk=self.pk).all()
-        else:
-            place = self.meeting_room
-            events = Event.objects.filter(room__pk=place.pk).exclude(pk=self.pk).all()
-        events_capacity = sum(i.event_capacity for i in events)
-        if (place.seat_capacity - events_capacity) < self.event_capacity:
-            raise ValidationError("Can't create event for this place")
+        if not (self.room is None and self.meeting_room is None):
+            # проверка на кол-во свободных мест в комнате
+            if self.room is not None:
+                place = self.room
+                events = (
+                    Event.objects.filter(room__pk=place.pk).exclude(pk=self.pk).all()
+                )
+            else:
+                place = self.meeting_room
+                events = (
+                    Event.objects.filter(meeting_room__pk=place.pk)
+                    .exclude(pk=self.pk)
+                    .all()
+                )
+            events = [i for i in events if i.start <= self.start <= i.end]
+            events_capacity = sum(i.event_capacity for i in events)
+            if (place.seat_capacity - events_capacity) < self.event_capacity:
+                raise ValidationError("Event capacity bigger then place capacity")
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         """
