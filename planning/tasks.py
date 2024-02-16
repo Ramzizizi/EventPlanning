@@ -1,5 +1,5 @@
-import time
 from datetime import timedelta
+from time import sleep
 
 from celery.utils.log import get_task_logger
 from django.core.mail import send_mail
@@ -25,7 +25,7 @@ def debug_task():
         logger.info(events)
         event = events[0] if len(events) >= 1 else None
         next_event = events[1] if len(events) > 1 else None
-        time_for_sleep = timedelta(minutes=30).seconds
+        time_for_sleep = timedelta(minutes=1).seconds
         if event is not None:
             if (event.start - localtime()).seconds <= timedelta(hours=1).seconds:
                 logger.info("Start check emails for send msgs")
@@ -43,17 +43,34 @@ def debug_task():
                 else:
                     logger.info("No find emails for send")
                 if next_event is not None:
-                    time_for_sleep = (
-                        next_event.start - localtime() - timedelta(hours=1)
-                    ).seconds
+                    if (next_event.start - localtime()).seconds - timedelta(
+                        hours=1
+                    ).seconds:
+                        logger.info("Start check emails for send msgs")
+                        visitors = next_event.visitors.all()
+                        emails = [i.email for i in visitors]
+                        if emails:
+                            logger.info(f"Send msg to: {emails}")
+                            send_mail(
+                                "Уведомление",
+                                f"В {next_event.start.__str__()} у вас будет мероприятие.",
+                                "admin@test.com",
+                                emails,
+                                fail_silently=True,
+                            )
+                        time_for_sleep = timedelta(minutes=1).seconds
+                    else:
+                        time_for_sleep = (
+                            next_event.start - localtime()
+                        ).seconds - timedelta(hours=1).seconds
                     logger.info(f"Wait next event: {time_for_sleep} seconds")
                 else:
-                    logger.info("Wait 30 minutes")
+                    logger.info(f"Wait {time_for_sleep} seconds")
             else:
-                time_for_sleep = (
-                    event.start - localtime() - timedelta(hours=1)
+                time_for_sleep = (event.start - localtime()).seconds - timedelta(
+                    hours=1
                 ).seconds
                 logger.info(f"Wait next event: {time_for_sleep} seconds")
         else:
-            logger.info("Wait 30 minutes")
-        time.sleep(time_for_sleep)
+            logger.info(f"Wait {time_for_sleep} seconds")
+        sleep(time_for_sleep)
