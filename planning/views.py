@@ -21,7 +21,7 @@ def events_list(request):
     upcoming_events = (
         models.Event.objects.exclude(event_status=1).order_by("start").all()
     )
-    [i.check_status for i in upcoming_events]
+    [event.check_status for event in upcoming_events]
     old_events = models.Event.objects.filter(event_status=1).order_by("start").all()[:5]
     return render(
         request,

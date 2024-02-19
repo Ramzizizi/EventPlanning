@@ -13,7 +13,7 @@ class CreateEventInRoom(forms.ModelForm):
     class Meta:
         model = Event
         fields = ["name", "event_capacity", "start", "end", "room"]
-        exclude = ["meeting_room"]
+        exclude = ["meeting_room", "msg_distribute"]
 
 
 class CreateEventInMeetingRoom(forms.ModelForm):
@@ -27,4 +27,4 @@ class CreateEventInMeetingRoom(forms.ModelForm):
     class Meta:
         model = Event
         fields = ["name", "event_capacity", "start", "end", "meeting_room"]
-        exclude = ["room"]
+        exclude = ["room", "msg_distribute"]

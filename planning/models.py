@@ -117,6 +117,7 @@ class Event(models.Model):
         default=EventStatus.ActiveEvent,
         verbose_name="Статус мероприятия",
     )
+    msg_distribute = models.BooleanField(blank=True, default=False, auto_created=True)
 
     objects = models.Manager()
 
@@ -170,8 +171,10 @@ class Event(models.Model):
                     .exclude(pk=self.pk)
                     .all()
                 )
-            events = [i for i in events if i.start <= self.start <= i.end]
-            events_capacity = sum(i.event_capacity for i in events)
+            events = [
+                event for event in events if event.start <= self.start <= event.end
+            ]
+            events_capacity = sum(event.event_capacity for event in events)
             if (place.seat_capacity - events_capacity) < self.event_capacity:
                 raise ValidationError("Event capacity bigger then place capacity")
 

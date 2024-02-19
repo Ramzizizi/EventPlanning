@@ -12,10 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
-from django.contrib.auth import get_user_model
-
-import planning.apps
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +24,7 @@ SECRET_KEY = "django-insecure-n6yl%xs@_leahelm7gq6)rm^^q*i#z9_sv&@)ajqs&sa=bo!lj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.0.205", "127.0.0.1"]
 
 # Application definition
 
@@ -78,9 +74,13 @@ WSGI_APPLICATION = "event_planning.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "2323",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    },
 }
 
 # Password validation
@@ -127,4 +127,3 @@ AUTH_USER_MODEL = "planning.CustomUser"
 
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = 'django-db'
