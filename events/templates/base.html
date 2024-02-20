@@ -33,12 +33,12 @@
 </div>
 <div>
     {% if user.is_authenticated and perms.planning.can_create_event%}
-    <button type="submit"><a href="/planning/choice_room/">Создать мероприятие</a>
+    <button type="submit"><a href="{% url 'event_create' %}">Создать мероприятие</a>
     </button>
     {% endif %}
 </div>
 <div class="events_info">
-    {% if upcoming_events %}
+    {% if available_events %}
     <h3>Текущие и предстоящие мероприятия</h3>
     <table style="width:100%">
         <tr>
@@ -54,7 +54,7 @@
             </th>
             {% endif %}
         </tr>
-        {% for event in upcoming_events.all %}
+        {% for event in available_events %}
         <tr>
             <td>
                 {{event.name}}
@@ -63,11 +63,7 @@
                 {{event.organizer}}
             </td>
             <td>
-                {% if event.room is not None%}
-                    {{event.room.name}}
-                {% else %}
-                    {{event.meeting_room.name}}
-                {% endif %}
+                {{event.place.name}}
             </td>
             <td>
                 {{event.free_capacity}}
@@ -81,10 +77,10 @@
             {% if user.is_authenticated %}
             <td>
                 {% if user in event.visitors.all %}
-                    <a href="/planning/event_out/{{event.id}}">Отказаться от записи</a>
+                    <a href="/events/event_out/{{event.id}}">Отказаться от записи</a>
                 {% else %}
                     {% if event.free_capacity %}
-                        <a href="/planning/event_sign/{{event.id}}">Записаться</a>
+                        <a href="/events/event_sign/{{event.id}}">Записаться</a>
                     {% else %}
                         Нет мест для записи
                     {% endif %}
@@ -108,7 +104,7 @@
             <th>Время начала</th>
             <th>Время конца</th>
         </tr>
-        {% for event in old_events.all %}
+        {% for event in pass_events %}
         <tr>
             <td>
                 {{event.name}}
@@ -117,11 +113,7 @@
                 {{event.organizer}}
             </td>
             <td>
-                {% if event.room is not None%}
-                    {{event.room.name}}
-                {% else %}
-                    {{event.meeting_room.name}}
-                {% endif %}
+                {{event.place.name}}
             </td>
             <td>
                 {{event.event_visitors_counts}}

@@ -6,11 +6,7 @@
 </head>
 <body>
 {% if user.is_authenticated and perms.planning.can_create_event%}
-    {% if 'meeting_room' in form.fields %}
-        <form action="/planning/event_create/meeting_room/" method="post">
-    {% else %}
-       <form action="/planning/event_create/room/" method="post">
-    {% endif %}
+    <form action="{% url 'event_create' %}" method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">

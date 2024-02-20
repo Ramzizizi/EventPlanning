@@ -29,7 +29,9 @@ ALLOWED_HOSTS = ["192.168.0.205", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
-    "planning.apps.PlanningConfig",
+    "events.apps.EventsConfig",
+    "places.apps.PlacesConfig",
+    "users.apps.UsersConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -54,7 +56,7 @@ ROOT_URLCONF = "event_planning.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["planning/templates"],
+        "DIRS": ["events/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -123,7 +125,9 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
-AUTH_USER_MODEL = "planning.CustomUser"
 
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+
+AUTH_USER_MODEL = "users.CustomUser"
