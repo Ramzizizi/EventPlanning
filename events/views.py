@@ -41,7 +41,7 @@ class Event(View):
         return render(
             request,
             "base.html",
-            context={
+            {
                 "pass_events": pass_event,
                 "available_events": available_events,
             },
@@ -54,8 +54,8 @@ class Event(View):
             event.organizer = request.user
             event.save()
             return redirect("/events/")
-        return render(request, "create_event.html", context={"form": form})
+        return render(request, "create_event.html", {"form": form})
 
     def get(self, request: WSGIRequest):
         form = self.form()
-        return render(request, "create_event.html", context={"form": form})
+        return render(request, "create_event.html", {"form": form})
