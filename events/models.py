@@ -39,7 +39,8 @@ class Event(models.Model):
     )
 
     event_capacity = models.IntegerField(
-        default=0, verbose_name="Количество участников",
+        default=0,
+        verbose_name="Количество участников",
     )
 
     start = models.DateTimeField(

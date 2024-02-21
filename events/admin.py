@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import Event
+from events import models as model_events
 
 
+@admin.register(model_events.Event)
 class EventAdmin(admin.ModelAdmin):
     """
     Отображение данные о мероприятии
@@ -10,20 +11,23 @@ class EventAdmin(admin.ModelAdmin):
 
     # отображаемые параметры
     list_display = ("name", "organizer", "start", "end", "place")
+    list_filter = ["name"]
+    search_fields = ["name"]
 
-    def organizer(self, obj: Event):
+    @admin.display(ordering="place__name")
+    def organizer(self, obj: model_events.Event):
         """
         Получение имени создателя ивента
         """
         return obj.organizer.username
 
-    def place(self, obj: Event):
+    def place(self, obj: model_events.Event):
         """
         Получение имени места проведения
         """
         return obj.place.name
 
-    def save_model(self, request, obj: Event, form, change):
+    def save_model(self, request, obj: model_events.Event, form, change):
         """
         Получения юзера
         """
@@ -31,6 +35,3 @@ class EventAdmin(admin.ModelAdmin):
         obj.organizer = request.user
         # создание модели
         super().save_model(request, obj, form, change)
-
-
-admin.site.register(Event, EventAdmin)

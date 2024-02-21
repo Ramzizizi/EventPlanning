@@ -9,11 +9,7 @@ class EventInline(admin.StackedInline):
     extra = 0
 
 
+@admin.register(model_places.Room, model_places.Auditorium)
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ("name", "seat_capacity")
     inlines = [EventInline]
-
-
-# регистрация моделей и их отображения
-admin.site.register(model_places.Room, PlaceAdmin)
-admin.site.register(model_places.Auditorium, PlaceAdmin)
