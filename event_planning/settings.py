@@ -10,8 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-n6yl%xs@_leahelm7gq6)rm^^q*i#z9_sv&@)ajqs&sa=bo!lj"
+SECRET_KEY = (
+    "django-insecure-n6yl%xs@_leahelm7gq6)rm^^q*i#z9_sv&@)ajqs&sa=bo!lj"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -77,11 +84,11 @@ WSGI_APPLICATION = "event_planning.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "2323",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "NAME": str(os.getenv("DB_NAME")),
+        "USER": str(os.getenv("DB_USER")),
+        "PASSWORD": str(os.getenv("DB_PASSWORD")),
+        "HOST": str(os.getenv("DB_HOST")),
+        "PORT": int(os.getenv("DB_PORT")),
     },
 }
 
@@ -131,3 +138,8 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 
 AUTH_USER_MODEL = "users.CustomUser"
+
+# константы для задачи
+SECONDS_FOR_WAIT = int(os.getenv("SECONDS_FOR_WAIT"))
+PRE_EVENT_TIME_SECONDS = int(os.getenv("PRE_EVENT_TIME_SECONDS"))
+FROM_EMAIL = "admin@test.com"

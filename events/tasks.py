@@ -5,16 +5,16 @@ from celery.utils.log import get_task_logger
 from django.core.mail import send_mail
 from django.utils.timezone import localtime
 
+from event_planning.settings import (
+    PRE_EVENT_TIME_SECONDS,
+    SECONDS_FOR_WAIT,
+    FROM_EMAIL,
+)
 from event_planning.event_celery import app
 from events import models as model_events
 
 
 logger = get_task_logger(__name__)
-
-# константы для задачи
-SECONDS_FOR_WAIT = 1800
-PRE_EVENT_TIME_SECONDS = 3600
-FROM_EMAIL = "admin@test.com"
 
 
 @app.task
