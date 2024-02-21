@@ -132,8 +132,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
 
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = str(os.getenv("REDIS_URL_BROKER"))
+CELERY_RESULT_BACKEND = str(os.getenv("REDIS_URL_BACKEND"))
 
 
 AUTH_USER_MODEL = "users.CustomUser"
