@@ -15,8 +15,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
+# загрузка .env файла
 load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -134,7 +135,6 @@ CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
 
 CELERY_BROKER_URL = str(os.getenv("REDIS_URL_BROKER"))
 CELERY_RESULT_BACKEND = str(os.getenv("REDIS_URL_BACKEND"))
-
 
 AUTH_USER_MODEL = "users.CustomUser"
 

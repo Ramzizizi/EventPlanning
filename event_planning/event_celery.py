@@ -14,6 +14,9 @@ app.autodiscover_tasks()
 
 @worker_ready.connect
 def at_start(sender, **k):
+    """
+    Запуск задачи при старте Celery
+    """
     with sender.app.connection() as conn:
         sender.app.send_task(
             "events.tasks.debug_task", connection=conn

@@ -1,25 +1,69 @@
 <html>
 <head>
     <style>
+        *{
+            font-size: 20px;
+        }
         table, th, td {
-          border:1px solid black;
+            margin: auto;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        td{
+            text-align: center;
         }
         .events_info {
-            margin-top: 10%;
+            margin-top: 8%;
+            text-align: center;
+        }
+        .create{
+            padding: 10px;
+        }
+        .log {
+            justify-content: end;
+            float: inline-end;
+            display: flex;
+            gap: 10px;
+        }
+        .log_out{
+            text-align: center;
+            width: 90px;
+        }
+        .log_out button:hover{
+            text-decoration: underline;
+        }
+        .log_in{
+            float: none;
+            flex-direction: none;
+            margin-top: 10px;
+        }
+        button{
+            font-size: 17px;
+        }
+        a{
+            font-size: 17px;
+            text-decoration: none;
+        }
+        a:hover{
+            text-decoration: underline;
+        }
+        a:visited{
+            color: black;
         }
     </style>
 </head>
 <body>
-<div>
+<div class="log">
     {% block content %}
     {% if user.is_authenticated %}
-    {{ user.username }}
-    <form action="{% url 'logout' %}" method="post">
+
+    <form action="{% url 'logout' %}" method="post" class="log_out">
         {% csrf_token %}
+        {{ user.username }}
         <button type="submit">Log Out</button>
     </form>
     {% else %}
-    <form method="post" action="{% url 'login' %}">
+    <form method="post" action="{% url 'login' %}" class="log_in">
         {% csrf_token %}
         <label for="email">E-mail: </label>
         <input type="email" id="email" name="email" required/>
@@ -31,7 +75,7 @@
     {% endif %}
     {% endblock %}
 </div>
-<div>
+<div class="create">
     {% if user.is_authenticated and perms.planning.can_create_event%}
     <button type="submit"><a href="{% url 'event_create' %}">Создать мероприятие</a>
     </button>
@@ -40,7 +84,7 @@
 <div class="events_info">
     {% if available_events %}
     <h3>Текущие и предстоящие мероприятия</h3>
-    <table style="width:100%">
+    <table style="width: 1150px">
         <tr>
             <th>Название</th>
             <th>Организатор</th>
@@ -77,10 +121,10 @@
             {% if user.is_authenticated %}
             <td>
                 {% if user in event.visitors.all %}
-                    <a href="/events/event_out/{{event.id}}">Отказаться от записи</a>
+                    <a href="/events/event_out/{{event.id}}" style="font-size: 20px;">Отказаться от записи</a>
                 {% else %}
                     {% if event.free_capacity %}
-                        <a href="/events/event_sign/{{event.id}}">Записаться</a>
+                        <a href="/events/event_sign/{{event.id}}" style="font-size: 20px;">Записаться</a>
                     {% else %}
                         Нет мест для записи
                     {% endif %}
@@ -93,9 +137,9 @@
     {% else %}
     <p>Планируемых мероприятий нет.</p>
     {% endif %}
-    {% if old_events %}
+    {% if pass_events %}
     <h3>Последние 5 мероприятий</h3>
-    <table style="width:100%">
+    <table style="width:1150px">
         <tr>
             <th>Название</th>
             <th>Организатор</th>
@@ -116,7 +160,7 @@
                 {{event.place.name}}
             </td>
             <td>
-                {{event.event_visitors_counts}}
+                {{event.event_visitors_count}}
             </td>
             <td>
                 {{event.start|date:'Y-m-d H:i'}}

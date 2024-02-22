@@ -19,9 +19,12 @@ logger = get_task_logger(__name__)
 
 @app.task
 def debug_task():
+    """
+    Задача для рассылки уведомлений
+    """
     logger.info("Task start")
     while True:
-        # получаем ближайшие 2 мероприятия
+        # получаем мероприятия на день для которых не было произведено рассылки
         events = (
             model_events.Event.objects.exclude(msg_distribute=1)
             .filter(
@@ -34,13 +37,14 @@ def debug_task():
             .all()
         )
         logger.info(f"Find events: {events}")
-        # обрабатываем первое мероприятие
+        # обрабатываем все мероприятия
         for event in events:
             logger.info(f"Start send msgs for event: {event.name}")
             visitors = event.visitors.all()
             # получаем список почт для рассылки
             visitor_emails = [visitor.email for visitor in visitors]
             logger.info(f"Visitors list: {visitor_emails}")
+            # отправляем сообщения
             send_mail(
                 "Уведомление",
                 f"В {event.start.__str__()} у вас будет мероприятие.",
@@ -48,8 +52,10 @@ def debug_task():
                 visitor_emails,
                 fail_silently=True,
             )
+            # устанавливаем статус произведенной рассылки
             event.msg_distribute = True
             event.save()
             logger.info(f"End send msgs for event: {event.name}")
         logger.info(f"Wait {SECONDS_FOR_WAIT} seconds")
+        # ожидание заданного времени
         sleep(SECONDS_FOR_WAIT)

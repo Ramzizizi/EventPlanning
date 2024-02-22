@@ -34,6 +34,7 @@ class Event(models.Model):
 
     visitors: user_models.CustomUser = models.ManyToManyField(
         user_models.CustomUser,
+        blank=True,
         related_name="Visitor",
         verbose_name="Посетители",
     )
@@ -58,7 +59,7 @@ class Event(models.Model):
     )
 
     msg_distribute = models.BooleanField(
-        blank=True, default=False, auto_created=True
+        blank=True, default=False, auto_created=True, editable=False,
     )
 
     @property
@@ -80,7 +81,6 @@ class Event(models.Model):
 
         return EventStatus.AVAILABLE_EVENT
 
-    # функция вызывающая при сохранении для валидации введенных данных
     def clean(self):
         """
         Валидация уже введенных данных
@@ -127,9 +127,9 @@ class Event(models.Model):
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_start_or_end_time",
                 check=(
-                    models.Q(start__isnull=False, end__isnull=False)
-                    | models.Q(start__isnull=True, end__isnull=False)
-                    | models.Q(start__isnull=False, end__isnull=True)
+                        models.Q(start__isnull=False, end__isnull=False)
+                        | models.Q(start__isnull=True, end__isnull=False)
+                        | models.Q(start__isnull=False, end__isnull=True)
                 ),
             ),
         ]
