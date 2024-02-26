@@ -17,17 +17,17 @@
             text-align: center;
         }
         .create{
-            padding: 10px;
+            display: flex;
+            float: right;
         }
         .log {
             justify-content: end;
-            float: inline-end;
             display: flex;
             gap: 10px;
         }
         .log_out{
             text-align: center;
-            width: 90px;
+            margin: 10px;
         }
         .log_out button:hover{
             text-decoration: underline;
@@ -56,7 +56,6 @@
 <div class="log">
     {% block content %}
     {% if user.is_authenticated %}
-
     <form action="{% url 'logout' %}" method="post" class="log_out">
         {% csrf_token %}
         {{ user.username }}
@@ -70,7 +69,6 @@
         <label for="pass">Пароль: </label>
         <input type="password" id="pass" name="pass" required/>
         <input type="submit">
-        <input type="hidden" name="next" value="{{ next }}">
     </form>
     {% endif %}
     {% endblock %}
@@ -122,6 +120,8 @@
             <td>
                 {% if user in event.visitors.all %}
                     <a href="/events/event_out/{{event.id}}" style="font-size: 20px;">Отказаться от записи</a>
+                {% elif event.event_status.value == 2 %}
+                    Невозможно записаться
                 {% else %}
                     {% if event.free_capacity %}
                         <a href="/events/event_sign/{{event.id}}" style="font-size: 20px;">Записаться</a>
@@ -160,7 +160,7 @@
                 {{event.place.name}}
             </td>
             <td>
-                {{event.event_visitors_count}}
+                {{event.count}}
             </td>
             <td>
                 {{event.start|date:'Y-m-d H:i'}}

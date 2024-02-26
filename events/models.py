@@ -3,6 +3,8 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Sum, Count, Q
+from django.db.models.functions import Coalesce
 from django.utils.timezone import localtime
 
 from users import models as user_models
@@ -10,8 +12,19 @@ from places import models as place_models
 
 
 class EventStatus(enum.Enum):
-    AVAILABLE_EVENT = 1
-    PASS_EVENT = 2
+    UPCOMING = 1
+    IN_PROGRESS = 2
+    PASSED = 3
+
+
+class EventManager(models.Manager):
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(count=Coalesce(Count("visitors"), 0))
+        )
 
 
 class Event(models.Model):
@@ -19,7 +32,7 @@ class Event(models.Model):
     Модель мероприятия
     """
 
-    objects = models.Manager()
+    event_object = EventManager()
 
     # задание параметров
     name = models.CharField(max_length=255, verbose_name="Название")
@@ -59,16 +72,18 @@ class Event(models.Model):
     )
 
     msg_distribute = models.BooleanField(
-        blank=True, default=False, auto_created=True, editable=False,
+        blank=True,
+        default=False,
+        auto_created=True,
+        editable=False,
     )
 
     @property
-    def event_visitors_count(self) -> int:
-        return self.visitors.count()
-
-    @property
     def free_capacity(self) -> int:
-        return self.event_capacity - self.event_visitors_count
+        return (
+            self.event_capacity
+            - Event.event_object.filter(pk=self.pk).first().count
+        )  # type: ignore
 
     @property
     def event_status(self):
@@ -76,10 +91,10 @@ class Event(models.Model):
 
         if self.start < time_now:
             if self.end < time_now:
-                return EventStatus.PASS_EVENT
-            return EventStatus.AVAILABLE_EVENT
+                return EventStatus.PASSED
+            return EventStatus.IN_PROGRESS
 
-        return EventStatus.AVAILABLE_EVENT
+        return EventStatus.UPCOMING
 
     def clean(self):
         """
@@ -87,7 +102,7 @@ class Event(models.Model):
         """
         if not self.event_capacity:
             raise ValidationError("Need visitors")
-        if type(self.end) != datetime or type(self.start) != datetime:
+        if type(self.end) is not datetime or type(self.start) is not datetime:
             raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
         if self.end < self.start:
@@ -102,15 +117,15 @@ class Event(models.Model):
                 "Event start can't be older than the current date and time"
             )
         # проверка на кол-во свободных мест в комнате
-        events = (
-            Event.objects.filter(place__pk=self.place.pk)
+        events_capacity = (
+            Event.event_object.filter(
+                Q(place__pk=self.place.pk)
+                & (Q(start__lte=self.start) & Q(end__gte=self.start))
+                | (Q(start__lte=self.end) & Q(end__gte=self.end))
+            )
             .exclude(pk=self.pk)
-            .all()
-        )
-        events = [
-            event for event in events if event.start <= self.start <= event.end
-        ]
-        events_capacity = sum(event.event_capacity for event in events)
+            .aggregate(sum=Coalesce(Sum("event_capacity"), 0))
+        )["sum"]
         if (self.place.seat_capacity - events_capacity) < self.event_capacity:
             raise ValidationError("Event capacity bigger then place capacity")
 
@@ -127,9 +142,9 @@ class Event(models.Model):
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_start_or_end_time",
                 check=(
-                        models.Q(start__isnull=False, end__isnull=False)
-                        | models.Q(start__isnull=True, end__isnull=False)
-                        | models.Q(start__isnull=False, end__isnull=True)
+                    models.Q(start__isnull=False, end__isnull=False)
+                    | models.Q(start__isnull=True, end__isnull=False)
+                    | models.Q(start__isnull=False, end__isnull=True)
                 ),
             ),
         ]

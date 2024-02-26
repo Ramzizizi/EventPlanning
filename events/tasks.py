@@ -7,7 +7,7 @@ from django.utils.timezone import localtime
 
 from event_planning.settings import (
     PRE_EVENT_TIME_SECONDS,
-    SECONDS_FOR_WAIT,
+    PERIOD_NOTIFICATION_SECONDS,
     FROM_EMAIL,
 )
 from event_planning.event_celery import app
@@ -26,7 +26,7 @@ def debug_task():
     while True:
         # получаем мероприятия на день для которых не было произведено рассылки
         events = (
-            model_events.Event.objects.exclude(msg_distribute=1)
+            model_events.Event.event_object.exclude(msg_distribute=1)
             .filter(
                 msg_distribute=False,
                 start__gte=localtime(),
@@ -56,6 +56,6 @@ def debug_task():
             event.msg_distribute = True
             event.save()
             logger.info(f"End send msgs for event: {event.name}")
-        logger.info(f"Wait {SECONDS_FOR_WAIT} seconds")
+        logger.info(f"Wait {PERIOD_NOTIFICATION_SECONDS} seconds")
         # ожидание заданного времени
-        sleep(SECONDS_FOR_WAIT)
+        sleep(PERIOD_NOTIFICATION_SECONDS)

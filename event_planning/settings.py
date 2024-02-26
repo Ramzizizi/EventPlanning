@@ -139,6 +139,6 @@ CELERY_RESULT_BACKEND = str(os.getenv("REDIS_URL_BACKEND"))
 AUTH_USER_MODEL = "users.CustomUser"
 
 # константы для задачи
-SECONDS_FOR_WAIT = int(os.getenv("SECONDS_FOR_WAIT"))
+PERIOD_NOTIFICATION_SECONDS = int(os.getenv("PERIOD_NOTIFICATION_SECONDS"))
 PRE_EVENT_TIME_SECONDS = int(os.getenv("PRE_EVENT_TIME_SECONDS"))
 FROM_EMAIL = "admin@test.com"

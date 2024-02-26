@@ -1,6 +1,12 @@
 from django.db import models
 
 
+class ActiveManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class Place(models.Model):
     """
     Модель места
@@ -9,8 +15,10 @@ class Place(models.Model):
     # базовые параметры места
     seat_capacity = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
 
     objects = models.Manager()
+    active_places = ActiveManager()
 
     def __str__(self):
         return self.name
