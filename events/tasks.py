@@ -29,8 +29,8 @@ def debug_task():
             model_events.Event.event_object.exclude(msg_distribute=1)
             .filter(
                 msg_distribute=False,
-                start__gte=localtime(),
-                start__lte=localtime()
+                datetime_start__gte=localtime(),
+                datetime_start__lte=localtime()
                 + timedelta(hours=PRE_EVENT_TIME_SECONDS),
             )
             .order_by("start")

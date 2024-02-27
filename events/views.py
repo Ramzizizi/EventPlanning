@@ -24,14 +24,21 @@ class Event(View):
         return redirect("/events/")
 
     @staticmethod
-    def events_list(request):
-        events = (
-            model_events.Event.event_object.filter(
-                start__date=localtime().date()
+    def events_list(request: WSGIRequest):
+        date_from = request.GET.get("date_from", False)
+        date_to = request.GET.get("date_to", False)
+        if date_from:
+            events = model_events.Event.event_object.filter(
+                datetime_start__date__gte=date_from
             )
-            .order_by("start")
-            .all()
-        )
+        else:
+            events = model_events.Event.event_object.filter(
+                datetime_start__date__gte=localtime().date()
+            )
+        if date_to:
+            events = events.filter(datetime_end__date__lte=date_to)
+        events = events.order_by("datetime_start")
+
         available_events, pass_event = [], []
 
         for event in events:
@@ -44,7 +51,7 @@ class Event(View):
             request,
             "base.html",
             {
-                "pass_events": pass_event,
+                "pass_events": pass_event[:5],
                 "available_events": available_events,
             },
         )

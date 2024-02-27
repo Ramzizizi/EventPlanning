@@ -10,7 +10,7 @@ class EventAdmin(admin.ModelAdmin):
     """
 
     # отображаемые параметры
-    list_display = ["name", "organizer", "start", "end", "place"]
+    list_display = ["name", "organizer", "datetime_start", "datetime_end", "place"]
     # поле для фильтрации
     list_filter = ["name"]
     # поле для поиска

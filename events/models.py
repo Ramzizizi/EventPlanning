@@ -57,13 +57,13 @@ class Event(models.Model):
         verbose_name="Количество участников",
     )
 
-    start = models.DateTimeField(
+    datetime_start = models.DateTimeField(
         "Время начала",
         blank=False,
         null=False,
     )
 
-    end = models.DateTimeField("Время конца", blank=False, null=False)
+    datetime_end = models.DateTimeField("Время конца", blank=False, null=False)
 
     place: place_models.Place = models.ForeignKey(
         place_models.Place,
@@ -89,8 +89,8 @@ class Event(models.Model):
     def event_status(self):
         time_now = localtime()
 
-        if self.start < time_now:
-            if self.end < time_now:
+        if self.datetime_start < time_now:
+            if self.datetime_end < time_now:
                 return EventStatus.PASSED
             return EventStatus.IN_PROGRESS
 
@@ -102,17 +102,20 @@ class Event(models.Model):
         """
         if not self.event_capacity:
             raise ValidationError("Need visitors")
-        if type(self.end) is not datetime or type(self.start) is not datetime:
+        if (
+            type(self.datetime_end) is not datetime
+            or type(self.datetime_start) is not datetime
+        ):
             raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
-        if self.end < self.start:
+        if self.datetime_end < self.datetime_start:
             raise ValidationError("Event end can't be newer the he start")
         # проверка соответствия текущему времени
-        if self.end < localtime():
+        if self.datetime_end < localtime():
             raise ValidationError(
                 "Event end can't be older than the current date and time"
             )
-        if self.start < localtime():
+        if self.datetime_start < localtime():
             raise ValidationError(
                 "Event start can't be older than the current date and time"
             )
@@ -120,8 +123,14 @@ class Event(models.Model):
         events_capacity = (
             Event.event_object.filter(
                 Q(place__pk=self.place.pk)
-                & (Q(start__lte=self.start) & Q(end__gte=self.start))
-                | (Q(start__lte=self.end) & Q(end__gte=self.end))
+                & (
+                    Q(datetime_start__lte=self.datetime_start)
+                    & Q(datetime_end__gte=self.datetime_start)
+                )
+                | (
+                    Q(datetime_start__lte=self.datetime_end)
+                    & Q(datetime_end__gte=self.datetime_end)
+                )
             )
             .exclude(pk=self.pk)
             .aggregate(sum=Coalesce(Sum("event_capacity"), 0))
@@ -142,9 +151,15 @@ class Event(models.Model):
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_start_or_end_time",
                 check=(
-                    models.Q(start__isnull=False, end__isnull=False)
-                    | models.Q(start__isnull=True, end__isnull=False)
-                    | models.Q(start__isnull=False, end__isnull=True)
+                    models.Q(
+                        datetime_start__isnull=False, datetime_end__isnull=False
+                    )
+                    | models.Q(
+                        datetime_start__isnull=True, datetime_end__isnull=False
+                    )
+                    | models.Q(
+                        datetime_start__isnull=False, datetime_end__isnull=True
+                    )
                 ),
             ),
         ]
