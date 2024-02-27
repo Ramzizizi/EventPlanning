@@ -4,7 +4,7 @@ from events import views as view_events
 
 # установка рутов для приложения
 urlpatterns = [
-    path("", view_events.Event.events_list),
+    path("", view_events.Event.events_list, name='main'),
     path(
         "event_sign/<int:event_id>",
         view_events.Event.event_sign,
