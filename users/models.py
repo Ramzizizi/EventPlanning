@@ -9,14 +9,15 @@ class CustomUser(AbstractUser):
     """
 
     # инициализация полей
-    username = models.TextField(max_length=255, unique=True)
     email = models.EmailField(
-        verbose_name="email address",
+        verbose_name="E-mail адрес",
         max_length=255,
         unique=True,
     )
-    date_of_birth = models.DateField()
-    is_admin = models.BooleanField(default=False)
+    date_of_birth = models.DateField(verbose_name="Дата рождения")
+    is_admin = models.BooleanField(
+        default=False, verbose_name="Статус администратора"
+    )
 
     # установка параметров полей
     USERNAME_FIELD = "email"

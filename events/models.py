@@ -9,6 +9,7 @@ from django.utils.timezone import localtime
 
 from users import models as user_models
 from places import models as place_models
+from events_type import models as event_type_models
 
 
 class EventStatus(enum.Enum):
@@ -52,18 +53,22 @@ class Event(models.Model):
         verbose_name="Посетители",
     )
 
-    event_capacity = models.IntegerField(
+    event_capacity = models.PositiveIntegerField(
         default=0,
         verbose_name="Количество участников",
     )
 
     datetime_start = models.DateTimeField(
-        "Время начала",
+        verbose_name="Время начала",
         blank=False,
         null=False,
     )
 
-    datetime_end = models.DateTimeField("Время конца", blank=False, null=False)
+    datetime_end = models.DateTimeField(
+        verbose_name="Время конца",
+        blank=False,
+        null=False,
+    )
 
     place: place_models.Place = models.ForeignKey(
         place_models.Place,
@@ -71,11 +76,20 @@ class Event(models.Model):
         verbose_name="Место провидения",
     )
 
+    event_type = models.ForeignKey(
+        event_type_models.EventType,
+        on_delete=models.CASCADE,
+        verbose_name="Тип мероприятия",
+        related_name="event",
+        editable=False,
+    )
+
     msg_distribute = models.BooleanField(
         blank=True,
         default=False,
         auto_created=True,
         editable=False,
+        verbose_name="Подвергалась рассылке"
     )
 
     @property
@@ -163,3 +177,5 @@ class Event(models.Model):
                 ),
             ),
         ]
+        verbose_name = "Мероприятие"
+        verbose_name_plural = "Мероприятия"

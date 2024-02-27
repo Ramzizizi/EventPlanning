@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "events.apps.EventsConfig",
     "places.apps.PlacesConfig",
     "users.apps.UsersConfig",
+    "events_type.apps.EventsTypeConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

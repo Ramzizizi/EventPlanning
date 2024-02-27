@@ -1,35 +1,41 @@
 from django.contrib import admin
 
-from events import models as model_events
+from events import models as event_models
 
 
-@admin.register(model_events.Event)
+@admin.register(event_models.Event)
 class EventAdmin(admin.ModelAdmin):
     """
     Отображение данные о мероприятии
     """
 
     # отображаемые параметры
-    list_display = ["name", "organizer", "datetime_start", "datetime_end", "place"]
+    list_display = [
+        "name",
+        "organizer",
+        "datetime_start",
+        "datetime_end",
+        "place",
+    ]
     # поле для фильтрации
     list_filter = ["name"]
     # поле для поиска
     search_fields = ["name"]
 
     @admin.display(ordering="place__name")
-    def organizer(self, obj: model_events.Event):
+    def organizer(self, obj: event_models.Event):
         """
         Получение имени создателя ивента
         """
         return obj.organizer.username
 
-    def place(self, obj: model_events.Event):
+    def place(self, obj: event_models.Event):
         """
         Получение имени места проведения
         """
         return obj.place.name
 
-    def save_model(self, request, obj: model_events.Event, form, change):
+    def save_model(self, request, obj: event_models.Event, form, change):
         """
         Получения юзера
         """
