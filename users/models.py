@@ -30,3 +30,13 @@ class CustomUser(AbstractUser):
         ):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
+
+
+class Speaker(models.Model):
+    speaker: CustomUser = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="Speaker",
+        verbose_name="Спикер",
+    )
+    theme = models.TextField(max_length=255, verbose_name="Тема выступления")

@@ -15,7 +15,7 @@
             <form action="{% url 'logout' %}" method="post" class="log_out">
                 {% csrf_token %}
                 {{ user.username }}
-                <button type="submit" class="btn btn-primary btn-sm m-2 ">Log Out</button>
+                <button type="submit" class="btn btn-primary btn-sm m-2 ">Выход</button>
             </form>
         </div>
         {% else %}
@@ -24,7 +24,7 @@
                 {% csrf_token %}
                 <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com"/>
                 <input type="password" class="form-control" id="pass" name="pass" placeholder="Пароль"/>
-                <input type="submit" class="btn btn-primary btn-sm m-2 ">
+                <input type="submit" class="btn btn-primary btn-sm m-2" value="Вход"/>
             </form>
         </div>
         {% endif %}

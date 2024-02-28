@@ -3,23 +3,29 @@ from django.shortcuts import redirect, render
 from django.utils.timezone import localtime
 from django.views import View
 
-from events import models as model_events
-from events import forms as form_events
+from users import forms as user_forms
+from users import models as user_models
+from events import models as event_models
+from events import forms as event_forms
+from events_type import forms as event_type_forms
 
 
 class Event(View):
 
-    form = form_events.CreateEvent
+    event_create_form = event_forms.CreateEvent
+    meeting_form = event_type_forms.CreateMeeting
+    conf_call_form = event_type_forms.CreateConfCall
+    conference_form = event_type_forms.CreateConference
 
     @staticmethod
     def event_sign(request, event_id):
-        event = model_events.Event.event_object.get(pk=event_id)
+        event = event_models.Event.event_object.get(pk=event_id)
         event.visitors.add(request.user)
         return redirect("/events/")
 
     @staticmethod
     def event_out(request, event_id):
-        event = model_events.Event.event_object.get(pk=event_id)
+        event = event_models.Event.event_object.get(pk=event_id)
         event.visitors.remove(request.user)
         return redirect("/events/")
 
@@ -28,11 +34,11 @@ class Event(View):
         date_from = request.GET.get("date_from", False)
         date_to = request.GET.get("date_to", False)
         if date_from:
-            events = model_events.Event.event_object.filter(
+            events = event_models.Event.event_object.filter(
                 datetime_start__date__gte=date_from
             )
         else:
-            events = model_events.Event.event_object.filter(
+            events = event_models.Event.event_object.filter(
                 datetime_start__date__gte=localtime().date()
             )
         if date_to:
@@ -42,7 +48,7 @@ class Event(View):
         available_events, pass_event = [], []
 
         for event in events:
-            if event.event_status == model_events.EventStatus.PASSED:
+            if event.event_status == event_models.EventStatus.PASSED:
                 pass_event.append(event)
             else:
                 available_events.append(event)
@@ -57,14 +63,47 @@ class Event(View):
         )
 
     def post(self, request: WSGIRequest):
-        form = self.form(request.POST)
-        if form.is_valid():
-            event: model_events.Event = form.save(commit=False)
+        event_create_form = self.event_create_form(request.POST)
+        meeting_form = self.meeting_form(request.POST)
+        conference_form = self.conference_form(request.POST)
+        conf_call_form = self.conf_call_form(request.POST)
+        if meeting_form.changed_data:
+            type_form = meeting_form
+        elif conf_call_form.changed_data:
+            type_form = conf_call_form
+        else:
+            type_form = conference_form
+        if event_create_form.is_valid() and type_form.is_valid():
+            event: event_models.Event = event_create_form.save(commit=False)
+            event_type = type_form.save(commit=False)
+            event_type.save()
             event.organizer = request.user
+            event.event_type = event_type
             event.save()
             return redirect("/events/")
-        return render(request, "create_event.html", {"form": form})
+        return render(
+            request,
+            "create_event.html",
+            {
+                "event_create_form": event_create_form,
+                "meeting_form": meeting_form,
+                "conference_form": conference_form,
+                "conf_call_form": conf_call_form,
+            },
+        )
 
     def get(self, request: WSGIRequest):
-        form = self.form()
-        return render(request, "create_event.html", {"form": form})
+        return render(
+            request,
+            "create_event.html",
+            {
+                "event_create_form": self.event_create_form(),
+                "meeting_form": self.meeting_form(use_required_attribute=False),
+                "conference_form": user_forms.SpeakerFormSet(
+                    queryset=user_models.Speaker.objects.none()
+                ),
+                "conf_call_form": self.conf_call_form(
+                    use_required_attribute=False
+                ),
+            },
+        )

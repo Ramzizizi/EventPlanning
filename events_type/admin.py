@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from users import models as user_models
 from events import models as event_models
 from events_type import models as event_type_models
 
@@ -13,7 +14,6 @@ class EventInline(admin.StackedInline):
 
 @admin.register(
     event_type_models.Meeting,
-    event_type_models.Conference,
     event_type_models.ConfCall,
 )
 class PlaceAdmin(admin.ModelAdmin):
@@ -58,3 +58,8 @@ class PlaceAdmin(admin.ModelAdmin):
             inline_instances.append(inline)
 
         return inline_instances
+
+
+@admin.register(event_type_models.Conference)
+class ConferenceAdmin(PlaceAdmin):
+    inlines = [EventInline]

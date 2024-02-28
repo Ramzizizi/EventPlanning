@@ -38,13 +38,12 @@ class Meeting(EventType):
 
 
 class Conference(EventType):
-    speaker: user_models.CustomUser = models.ForeignKey(
-        user_models.CustomUser,
-        on_delete=models.CASCADE,
-        related_name="Speaker",
-        verbose_name="Спикер",
+    speakers = models.ManyToManyField(
+        user_models.Speaker,
+        verbose_name="Спикеры",
+        null=True,
+        blank=True,
     )
-    theme = models.TextField(max_length=255, verbose_name="Тема выступления")
 
     class Meta:
         verbose_name = "Конференция"

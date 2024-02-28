@@ -124,15 +124,16 @@ class Event(models.Model):
         # проверка начала и конца ивента
         if self.datetime_end < self.datetime_start:
             raise ValidationError("Event end can't be newer the he start")
-        # проверка соответствия текущему времени
-        if self.datetime_end < localtime():
-            raise ValidationError(
-                "Event end can't be older than the current date and time"
-            )
-        if self.datetime_start < localtime():
-            raise ValidationError(
-                "Event start can't be older than the current date and time"
-            )
+        if self.pk is None:
+            # проверка соответствия текущему времени
+            if self.datetime_end < localtime():
+                raise ValidationError(
+                    "Event end can't be older than the current date and time"
+                )
+            if self.datetime_start < localtime():
+                raise ValidationError(
+                    "Event start can't be older than the current date and time"
+                )
         # проверка на кол-во свободных мест в комнате
         events_capacity = (
             Event.event_object.filter(
