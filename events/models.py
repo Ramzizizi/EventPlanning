@@ -117,8 +117,8 @@ class Event(models.Model):
         if not self.event_capacity:
             raise ValidationError("Need visitors")
         if (
-            type(self.datetime_end) is not datetime
-            or type(self.datetime_start) is not datetime
+            not isinstance(self.datetime_end, datetime)
+            or not isinstance(self.datetime_start, datetime)
         ):
             raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента

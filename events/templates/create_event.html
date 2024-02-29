@@ -19,7 +19,11 @@
                     {{ conf_call_form }}
                 </div>
                 <div class="form2" style="padding-top: 10px; width: 25%;">
-                    {{ conference_form }}
+                    <div class="in_form2">
+                        {{ conference_form }}
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-add" style="margin: 2% 2% 2% 0%;">Добавить спикера</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-delete">Удалить спикера</button>
                 </div>
                 <div class="form3" style="padding-top: 10px; width: 25%;">
                     {{ meeting_form }}
@@ -36,5 +40,6 @@
     {% endif %}
 </div>
 <script src="{% static 'events/page.js' %}"></script>
+<script src="{% static 'events/speaker.js' %}"></script>
 </body>
 </html>

@@ -12,6 +12,12 @@ class EventInline(admin.StackedInline):
         return False
 
 
+class ThemeInline(admin.StackedInline):
+    model = event_type_models.Themes
+
+    extra = 1
+
+
 @admin.register(
     event_type_models.Meeting,
     event_type_models.ConfCall,
@@ -62,4 +68,22 @@ class PlaceAdmin(admin.ModelAdmin):
 
 @admin.register(event_type_models.Conference)
 class ConferenceAdmin(PlaceAdmin):
-    inlines = [EventInline]
+    inlines = [ThemeInline, EventInline]
+
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+
+        for inline_class in self.get_inlines(request, obj):
+            inline = inline_class(self.model, self.admin_site)
+            if request:
+                if not (inline.has_view_or_change_permission(request, obj)):
+                    continue
+                if type(inline) is EventInline:
+                    inline.min_num = 1
+                    inline.max_num = 1
+                if obj is not None:
+                    inline.min_num = 0
+                    inline.max_num = 0
+            inline_instances.append(inline)
+
+        return inline_instances

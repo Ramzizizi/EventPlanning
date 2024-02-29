@@ -25,7 +25,7 @@ class Meeting(EventType):
         null=False,
         verbose_name="Необходимость посещения",
     )
-    theme = models.TextField(
+    meeting_theme = models.TextField(
         max_length=255,
         blank=False,
         null=False,
@@ -39,12 +39,33 @@ class Meeting(EventType):
 
 class Conference(EventType):
     speakers = models.ManyToManyField(
-        user_models.Speaker,
+        user_models.CustomUser,
         verbose_name="Спикеры",
-        null=True,
+        through="Themes",
         blank=True,
     )
 
     class Meta:
         verbose_name = "Конференция"
         verbose_name_plural = "Конференции"
+
+
+class Themes(models.Model):
+    event: Conference = models.ForeignKey(
+        Conference,
+        on_delete=models.CASCADE,
+    )
+    speaker: user_models.CustomUser = models.ForeignKey(
+        user_models.CustomUser,
+        on_delete=models.CASCADE,
+        related_name="Speaker",
+        verbose_name="Спикер",
+    )
+    theme = models.TextField(
+        max_length=255,
+        verbose_name="Тема выступления",
+    )
+
+    class Meta:
+        verbose_name = "Тема"
+        verbose_name_plural = "Темы"
