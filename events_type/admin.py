@@ -6,13 +6,25 @@ from events_type import models as event_type_models
 
 
 class EventInline(admin.StackedInline):
+    """
+    Класс inline для ивента
+    """
+
     model = event_models.Event
 
     def has_delete_permission(self, request, obj=None):
+        """
+        Функция проверки прав на удаление
+        """
+        # при создании типа ивента нельзя удалять сам ивент
         return False
 
 
 class ThemeInline(admin.StackedInline):
+    """
+    Класс inline для темы конференции
+    """
+
     model = event_type_models.Themes
 
     extra = 1
@@ -22,7 +34,11 @@ class ThemeInline(admin.StackedInline):
     event_type_models.Meeting,
     event_type_models.ConfCall,
 )
-class PlaceAdmin(admin.ModelAdmin):
+class EventTypeAdmin(admin.ModelAdmin):
+    """
+    Класс страницы администратора для собраний и конф-звонков
+    """
+
     list_display = ["name", "datetime_start", "datetime_end", "place"]
 
     inlines = [EventInline]
@@ -44,14 +60,14 @@ class PlaceAdmin(admin.ModelAdmin):
         return obj.event.first().place.name
 
     def save_formset(self, request, form, formset, change):
-        """
-        Given an inline formset save it to the database.
-        """
         for form in formset.extra_forms:
             form.instance.organizer_id = request.user.id
         formset.save()
 
     def get_inline_instances(self, request, obj=None):
+        """
+        Функция настройки отображения inline объектов
+        """
         inline_instances = []
 
         for inline_class in self.get_inlines(request, obj):
@@ -59,6 +75,7 @@ class PlaceAdmin(admin.ModelAdmin):
             if request:
                 if not (inline.has_view_or_change_permission(request, obj)):
                     continue
+                # настройка количества объектов для ивентов
                 inline.min_num = 1
                 inline.max_num = 1
             inline_instances.append(inline)
@@ -67,10 +84,17 @@ class PlaceAdmin(admin.ModelAdmin):
 
 
 @admin.register(event_type_models.Conference)
-class ConferenceAdmin(PlaceAdmin):
+class ConferenceAdmin(EventTypeAdmin):
+    """
+    Класс страницы администратора для конференций
+    """
+
     inlines = [ThemeInline, EventInline]
 
     def get_inline_instances(self, request, obj=None):
+        """
+        Функция настройки отображения inline объектов
+        """
         inline_instances = []
 
         for inline_class in self.get_inlines(request, obj):
@@ -78,9 +102,12 @@ class ConferenceAdmin(PlaceAdmin):
             if request:
                 if not (inline.has_view_or_change_permission(request, obj)):
                     continue
-                if type(inline) is EventInline:
+                # настройка количества объектов для ивентов
+                if isinstance(inline, EventInline):
                     inline.min_num = 1
                     inline.max_num = 1
+                # если объект создан, то нельзя добавлять новые inline
+                # сделано для inline тем
                 if obj is not None:
                     inline.min_num = 0
                     inline.max_num = 0

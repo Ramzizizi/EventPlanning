@@ -10,7 +10,11 @@ class CreateEvent(forms.ModelForm):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Функция инициализации
+        """
         super(CreateEvent, self).__init__(*args, **kwargs)
+        # установка полям HTML параметров
         for field in self.fields:
             self.fields[field].widget.attrs.update(
                 {"class": "form-control", "style": "width: 25%"}

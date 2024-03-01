@@ -22,13 +22,14 @@ class EventAdmin(admin.ModelAdmin):
     # поле для поиска
     search_fields = ["name"]
 
-    @admin.display(ordering="place__name")
+    @admin.display(ordering="place__name", description="Организатор")
     def organizer(self, obj: event_models.Event):
         """
         Получение имени создателя ивента
         """
         return obj.organizer.username
 
+    @admin.display(description="Место проведения")
     def place(self, obj: event_models.Event):
         """
         Получение имени места проведения
