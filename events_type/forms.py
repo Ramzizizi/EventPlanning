@@ -14,13 +14,13 @@ class CreateThemeConference(forms.ModelForm):
                 "class": "form-control",
                 "style": "height: 0px;",
                 "id": "text_form_2",
-            }
+            },
         )
         self.fields["speaker"].widget.attrs.update(
             {
                 "class": "form-select",
                 "id": "select_form_2",
-            }
+            },
         )
 
     class Meta:
@@ -42,7 +42,7 @@ class CreateMeeting(forms.ModelForm):
                 "class": "form-control",
                 "style": "height: 0px;",
                 "id": "text_form_3",
-            }
+            },
         )
 
     class Meta:
@@ -63,7 +63,7 @@ class CreateConfCall(forms.ModelForm):
             {
                 "class": "form-control",
                 "id": "text_form_1",
-            }
+            },
         )
 
     class Meta:

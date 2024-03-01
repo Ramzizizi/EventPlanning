@@ -62,7 +62,7 @@ class Event(View):
         events = event_models.Event.event_object.filter(
             datetime_start__date__gte=(
                 date_from if date_from else localtime().date()
-            )
+            ),
         )
         # ограничением по времени конца
         if date_to:
@@ -98,10 +98,10 @@ class Event(View):
                 "event_create_form": self.event_create_form(),
                 "meeting_form": self.meeting_form(use_required_attribute=False),
                 "conference_form": self.conference_theme_form(
-                    use_required_attribute=False
+                    use_required_attribute=False,
                 ),
                 "conf_call_form": self.conf_call_form(
-                    use_required_attribute=False
+                    use_required_attribute=False,
                 ),
             },
         )
@@ -120,7 +120,10 @@ class Event(View):
         type_form = self.event_type_form_create(request)
         if event_create_form.is_valid() and (
             type_form.is_valid()
-            if not isinstance(type_form, list)
+            if not isinstance(
+                type_form,
+                list,
+            )
             else [theme.is_valid() for theme in type_form]
         ):
             # создание объекта ивента
@@ -195,6 +198,7 @@ class Event(View):
     def create_meeting_from(self, request: WSGIRequest):
         """
         Функция создания формы для собрания
+
         :return: Форма собрания если есть данные по собранию
         """
         # создание формы
@@ -205,11 +209,12 @@ class Event(View):
         # если данные в форме не пустые, возвращается форма
         if meeting_form.changed_data is not None:
             return meeting_form
-        return
+        return None
 
     def create_conf_call_from(self, request: WSGIRequest):
         """
         Функция создания формы для конференц-звонка
+
         :return: Форма конференц-звонка если есть данные по конференц-звонку
         """
         # создание формы
@@ -220,18 +225,19 @@ class Event(View):
         # если данные в форме не пустые, возвращается форма
         if conf_call_form.changed_data is not None:
             return conf_call_form
-        return
+        return None
 
     def create_theme_from(self, request: WSGIRequest):
         """
         Функция создания формы для тем конференции
+
         :return: Лист форм тем конференции
         """
         # преобразование данных
         theme_data = {
-            k: v
-            for k, v in request.POST.items()
-            if ("theme" in k or "speaker" in k) and (k != "meeting_theme")
+            key: value
+            for key, value in request.POST.items()
+            if ("theme" in key or "speaker" in key) and (key != "meeting_theme")
         }
         # нарезка данных на чанки
         sliced_data = self.conf_chunked(theme_data.values())
@@ -240,7 +246,7 @@ class Event(View):
         # если данные не пустые, возвращает лист форм
         if any(forms):
             return forms
-        return
+        return None
 
     @staticmethod
     def conf_chunked(conf_data: Iterable, chunk_size: int = 2):

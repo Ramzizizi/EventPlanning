@@ -22,9 +22,9 @@ class EventManager(models.Manager):
 
     def get_queryset(self):
         return (
-            super()
-            .get_queryset()
-            .annotate(count=Coalesce(Count("visitors"), 0))
+            super().
+            get_queryset().
+            annotate(count=Coalesce(Count("visitors"), 0))
         )
 
 
@@ -116,8 +116,12 @@ class Event(models.Model):
         """
         if not self.event_capacity:
             raise ValidationError("Need visitors")
-        if not isinstance(self.datetime_end, datetime) or not isinstance(
-            self.datetime_start, datetime
+        if not isinstance(
+            self.datetime_end,
+            datetime,
+        ) or not isinstance(
+            self.datetime_start,
+            datetime,
         ):
             raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
@@ -127,11 +131,11 @@ class Event(models.Model):
             # проверка соответствия текущему времени
             if self.datetime_end < localtime():
                 raise ValidationError(
-                    "Event end can't be older than the current date and time"
+                    "Event end can't be older than the current date and time",
                 )
             if self.datetime_start < localtime():
                 raise ValidationError(
-                    "Event start can't be older than the current date and time"
+                    "Event start can't be older than the current date and time",
                 )
         # проверка на кол-во свободных мест в комнате
         events_capacity = (
@@ -144,10 +148,10 @@ class Event(models.Model):
                 | (
                     Q(datetime_start__lte=self.datetime_end)
                     & Q(datetime_end__gte=self.datetime_end)
-                )
-            )
-            .exclude(pk=self.pk)
-            .aggregate(sum=Coalesce(Sum("event_capacity"), 0))
+                ),
+            ).
+            exclude(pk=self.pk).
+            aggregate(sum=Coalesce(Sum("event_capacity"), 0))
         )["sum"]
         if (self.place.seat_capacity - events_capacity) < self.event_capacity:
             raise ValidationError("Event capacity bigger then place capacity")

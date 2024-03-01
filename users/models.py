@@ -31,7 +31,7 @@ class CustomUser(AbstractUser):
                 "pbkdf2_sha256$",
                 "bcrypt$",
                 "argon2",
-            )
+            ),
         ):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
