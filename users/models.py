@@ -16,7 +16,8 @@ class CustomUser(AbstractUser):
     )
     date_of_birth = models.DateField(verbose_name="Дата рождения")
     is_admin = models.BooleanField(
-        default=False, verbose_name="Статус администратора"
+        default=False,
+        verbose_name="Статус администратора",
     )
 
     # установка параметров полей
@@ -26,7 +27,11 @@ class CustomUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         if self.password and not self.password.startswith(
-            ("pbkdf2_sha256$", "bcrypt$", "argon2")
+            (
+                "pbkdf2_sha256$",
+                "bcrypt$",
+                "argon2",
+            )
         ):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)

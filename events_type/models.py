@@ -3,7 +3,8 @@ from django.db import models
 from users import models as user_models
 
 
-class EventType(models.Model): ...
+class EventType(models.Model):
+    ...
 
 
 class ConfCall(EventType):

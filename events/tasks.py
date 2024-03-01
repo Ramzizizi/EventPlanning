@@ -26,15 +26,15 @@ def debug_task():
     while True:
         # получаем мероприятия на день для которых не было произведено рассылки
         events = (
-            model_events.Event.event_object.exclude(msg_distribute=1)
-            .filter(
+            model_events.Event.event_object.exclude(msg_distribute=1).
+            filter(
                 msg_distribute=False,
                 datetime_start__gte=localtime(),
                 datetime_start__lte=localtime()
                 + timedelta(hours=PRE_EVENT_TIME_SECONDS),
-            )
-            .order_by("start")
-            .all()
+            ).
+            order_by("start").
+            all()
         )
         logger.info(f"Find events: {events}")
         # обрабатываем все мероприятия
@@ -47,7 +47,7 @@ def debug_task():
             # отправляем сообщения
             send_mail(
                 "Уведомление",
-                f"В {event.start.__str__()} у вас будет мероприятие.",
+                f"В {event.start} у вас будет мероприятие.",
                 FROM_EMAIL,
                 visitor_emails,
                 fail_silently=True,

@@ -89,7 +89,7 @@ class Event(models.Model):
         default=False,
         auto_created=True,
         editable=False,
-        verbose_name="Подвергалась рассылке"
+        verbose_name="Подвергалась рассылке",
     )
 
     @property
@@ -116,9 +116,8 @@ class Event(models.Model):
         """
         if not self.event_capacity:
             raise ValidationError("Need visitors")
-        if (
-            not isinstance(self.datetime_end, datetime)
-            or not isinstance(self.datetime_start, datetime)
+        if not isinstance(self.datetime_end, datetime) or not isinstance(
+            self.datetime_start, datetime
         ):
             raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
@@ -167,13 +166,16 @@ class Event(models.Model):
                 name="%(app_label)s_%(class)s_start_or_end_time",
                 check=(
                     models.Q(
-                        datetime_start__isnull=False, datetime_end__isnull=False
+                        datetime_start__isnull=False,
+                        datetime_end__isnull=False,
                     )
                     | models.Q(
-                        datetime_start__isnull=True, datetime_end__isnull=False
+                        datetime_start__isnull=True,
+                        datetime_end__isnull=False,
                     )
                     | models.Q(
-                        datetime_start__isnull=False, datetime_end__isnull=True
+                        datetime_start__isnull=False,
+                        datetime_end__isnull=True,
                     )
                 ),
             ),

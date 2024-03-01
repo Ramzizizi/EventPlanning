@@ -17,7 +17,7 @@ class CreateEvent(forms.ModelForm):
         # установка полям HTML параметров
         for field in self.fields:
             self.fields[field].widget.attrs.update(
-                {"class": "form-control", "style": "width: 25%"}
+                {"class": "form-control", "style": "width: 25%"},
             )
 
         self.fields["place"].widget.attrs.update({"class": "form-select"})
