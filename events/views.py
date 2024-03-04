@@ -156,22 +156,22 @@ class Event(View):
             request.POST,
             use_required_attribute=False,
         )
-        # получения типа ивента
+        # получения формы
         type_form = self.event_type.event_type_form_create(request)
+        # валидация форм
         if event_create_form.is_valid() and self._is_form_creation_valid(type_form):
             # создание объекта ивента
             event: event_models.Event = event_create_form.save(commit=False)
             # установка организатора
             event.organizer = request.user
-
-            # если объект лист, то это набор тем для конференции
+            # выбор функции обработки формы
             processor_form = (
                 self.create_themes
                 if isinstance(type_form, list)
                 else self.create_event_simple
             )
+            # создание модели из формы
             event_type = processor_form(type_form)
-
             # установка типа ивента
             event.event_type = event_type
             # сохранение объекта модели

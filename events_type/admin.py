@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from users import models as user_models
 from events import models as event_models
 from events_type import models as event_type_models
 
