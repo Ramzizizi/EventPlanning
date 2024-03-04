@@ -2,6 +2,8 @@ const btn1 = document.querySelector("#btn1");
 const btn2 = document.querySelector("#btn2");
 const btn3 = document.querySelector("#btn3");
 
+const hidden_input = document.querySelector("#event_type");
+
 const form1 = document.querySelector(".form1");
 const form2 = document.querySelector(".form2");
 const form3 = document.querySelector(".form3");
@@ -11,6 +13,7 @@ form2.style.display = "none";
 form3.style.display = "none";
 
  btn1.addEventListener("click", function(){
+    hidden_input.value = 'conf_call';
     form1.style.display = "block";
     form2.style.display = "none";
     form3.style.display = "none";
@@ -21,6 +24,7 @@ form3.style.display = "none";
  });
 
  btn2.addEventListener("click", function(){
+    hidden_input.value = 'conference';
     form1.style.display = "none";
     form2.style.display = "block";
     form3.style.display = "none";
@@ -29,6 +33,7 @@ form3.style.display = "none";
  });
 
   btn3.addEventListener("click", function(){
+    hidden_input.value = 'meeting';
     form1.style.display = "none";
     form2.style.display = "none";
     form3.style.display = "block";

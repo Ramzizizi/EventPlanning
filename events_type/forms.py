@@ -32,6 +32,8 @@ class CreateThemeConference(forms.ModelForm):
         model = event_type_models.Themes
         # используемые поля
         fields = ["speaker", "theme"]
+        # количество полей для создания чанка
+        chunk_size = len(fields)
 
 
 class CreateMeeting(forms.ModelForm):

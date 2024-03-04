@@ -4,7 +4,7 @@ from users import models as user_models
 
 
 class EventType(models.Model):
-    ...
+    objects = models.Manager()
 
 
 class ConfCall(EventType):
@@ -52,6 +52,9 @@ class Conference(EventType):
 
 
 class Themes(models.Model):
+
+    objects = models.Manager()
+
     event: Conference = models.ForeignKey(
         Conference,
         on_delete=models.CASCADE,
