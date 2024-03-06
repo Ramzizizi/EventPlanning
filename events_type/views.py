@@ -10,7 +10,7 @@ from events_type import forms as event_type_forms
 
 class EventType(View):
     """
-    Класс представлений для типов имвентов
+    Класс представлений для типов ивентов
     """
 
     # инициализация форм
