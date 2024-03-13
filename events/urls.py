@@ -15,7 +15,12 @@ event_detail = view_events.EventViewSet.as_view(
         "delete": "destroy",
     },
 )
-
+visitors_detail = view_events.EventViewSet.as_view(
+    {
+        "post": "sign_in",
+        "delete": "sign_out",
+    },
+)
 
 # установка рутов для приложения
 urlpatterns = [
@@ -37,4 +42,5 @@ urlpatterns = [
     ),
     path("api/events/", event_list),
     path("api/events/<int:pk>/", event_detail),
+    path("api/events/<int:pk>/visitor/", visitors_detail),
 ]

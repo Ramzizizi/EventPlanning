@@ -1,11 +1,12 @@
 from django import forms
 from django.views import View
 from django.db import transaction
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django.utils.timezone import localtime
 from django.shortcuts import redirect, render
 from django.core.handlers.wsgi import WSGIRequest
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 from events import forms as event_forms
 from events import models as event_models
@@ -213,9 +214,6 @@ class EventViewSet(viewsets.ModelViewSet):
         "create": event_serializers.EventCreate,
         "retrieve": event_serializers.EventBase,
         "partial_update": event_serializers.EventPatch,
-        "meeting": event_type_serializers.Meeting,
-        "conf_call": event_type_serializers.ConfCall,
-        "conference": event_type_serializers.Conference,
     }
     queryset = event_models.Event.event_object.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -246,3 +244,31 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer.validated_data["event_type"] = event_type
         serializer.validated_data.pop("event_type_data")
         serializer.save(organizer=self.request.user)
+
+    def sign_in(self, request, *args, **kwargs):
+        event_object: event_models.Event.event_object = self.get_object()
+
+        if request.user in event_object.visitors.all():
+            return Response(
+                data={"error": "User almost sign in this event"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        event_object.visitors.add(request.user)
+        event_object.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def sign_out(self, request, *args, **kwargs):
+
+        event_object: event_models.Event.event_object = self.get_object()
+        if request.user not in event_object.visitors.all():
+            return Response(
+                data={"error": "User not sign in this event"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        event_object.visitors.remove(request.user)
+        event_object.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
