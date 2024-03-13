@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -136,8 +138,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000"]
-
 CELERY_BROKER_URL = str(os.getenv("REDIS_URL_BROKER"))
 CELERY_RESULT_BACKEND = str(os.getenv("REDIS_URL_BACKEND"))
 
@@ -147,3 +147,10 @@ AUTH_USER_MODEL = "users.CustomUser"
 PERIOD_NOTIFICATION_SECONDS = int(os.getenv("PERIOD_NOTIFICATION_SECONDS"))
 PRE_EVENT_TIME_SECONDS = int(os.getenv("PRE_EVENT_TIME_SECONDS"))
 FROM_EMAIL = "admin@test.com"
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

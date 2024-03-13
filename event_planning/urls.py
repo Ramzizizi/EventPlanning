@@ -17,10 +17,22 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt import views
 
 # подключение рутов из приложений
 urlpatterns = [
-    path("events/", include("events.urls")),
+    path("", include("events.urls")),
     path("users/", include("users.urls")),
     path("admin/", admin.site.urls),
+    path(
+        "api/token/",
+        csrf_exempt(views.TokenObtainPairView.as_view()),
+        name="token_obtain_pair",
+    ),
+    path(
+        "api/token/refresh/",
+        csrf_exempt(views.TokenRefreshView.as_view()),
+        name="token_refresh",
+    ),
 ]

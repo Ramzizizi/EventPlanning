@@ -8,7 +8,7 @@ from django.views import View
 from events_type import forms as event_type_forms
 
 
-class EventType(View):
+class EventBase(View):
     """
     Класс представлений для типов ивентов
     """

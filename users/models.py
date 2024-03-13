@@ -1,6 +1,11 @@
+from datetime import datetime, timedelta
+
+import jwt
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+from event_planning import settings
 
 
 class CustomUser(AbstractUser):
@@ -35,3 +40,21 @@ class CustomUser(AbstractUser):
         ):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
+
+    @property
+    def token(self):
+        return self._generate_jwt_token()
+
+    def _generate_jwt_token(self):
+        dt = datetime.now() + timedelta(days=1)
+
+        token = jwt.encode(
+            {
+                "id": self.pk,
+                "exp": int(dt.strftime("%s")),
+            },
+            settings.SECRET_KEY,
+            algorithm="HS256",
+        )
+
+        return token

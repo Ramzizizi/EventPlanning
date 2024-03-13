@@ -14,11 +14,11 @@ class UserViews(View):
         )
         if user is not None:
             login(request, user)
-        return redirect("/events/")
+        return redirect("/")
 
     @staticmethod
     def req_logout(request):
         user = request.user
         if user.is_authenticated:
             logout(request)
-        return redirect("/events/")
+        return redirect("/")

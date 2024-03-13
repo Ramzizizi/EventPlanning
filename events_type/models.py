@@ -3,11 +3,11 @@ from django.db import models
 from users import models as user_models
 
 
-class EventType(models.Model):
+class EventBase(models.Model):
     objects = models.Manager()
 
 
-class ConfCall(EventType):
+class ConfCall(EventBase):
     call_url = models.URLField(
         blank=False,
         null=False,
@@ -19,7 +19,7 @@ class ConfCall(EventType):
         verbose_name_plural = "Конференц-звонки"
 
 
-class Meeting(EventType):
+class Meeting(EventBase):
     need_visit = models.BooleanField(
         default=True,
         blank=False,
@@ -38,7 +38,7 @@ class Meeting(EventType):
         verbose_name_plural = "Собрания"
 
 
-class Conference(EventType):
+class Conference(EventBase):
     speakers = models.ManyToManyField(
         user_models.CustomUser,
         verbose_name="Спикеры",

@@ -36,7 +36,7 @@
         {% endblock %}
     </div>
     <div style="margin-left: 3%">
-        <form action="/events/" method="get">
+        <form action="/" method="get">
             Дата начала: <input type="date" name="date_from"/>
             Дата конца: <input type="date" name="date_to"/>
             <input type="submit" class="btn btn-outline-primary" value="Поиск">
@@ -62,14 +62,14 @@
                   <br>Свободно мест: {{event.free_capacity}}
                     {% if user in event.visitors.all %}
                         <br><button type="button" class="btn btn-outline-primary">
-                              <a href="/events/event_out/{{event.id}}" style="font-size: 20px;">Отказаться от записи</a>
+                              <a href="/event_out/{{event.id}}" style="font-size: 20px;">Отказаться от записи</a>
                           </button>
                     {% elif event.event_status.value == 2 %}
                         <br>Невозможно записаться
                     {% else %}
                         {% if event.free_capacity %}
                             <br><button type="button" class="btn btn-outline-primary">
-                              <a href="/events/event_sign/{{event.id}}" style="font-size: 20px;">Записаться</a>
+                              <a href="/event_sign/{{event.id}}" style="font-size: 20px;">Записаться</a>
                             </button>
                         {% else %}
                             <br>Нет мест для записи

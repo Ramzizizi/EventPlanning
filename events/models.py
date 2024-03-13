@@ -1,5 +1,4 @@
 import enum
-from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -9,6 +8,7 @@ from django.utils.timezone import localtime
 
 from users import models as user_models
 from places import models as place_models
+from events import validators as event_validators
 from events_type import models as event_type_models
 
 
@@ -60,24 +60,34 @@ class Event(models.Model):
 
     datetime_start = models.DateTimeField(
         verbose_name="Время начала",
-        blank=False,
+        blank=True,
         null=False,
+        validators=[
+            event_validators.datetime_type_validator,
+            event_validators.datetime_pass_validator,
+        ],
     )
 
     datetime_end = models.DateTimeField(
         verbose_name="Время конца",
-        blank=False,
+        blank=True,
         null=False,
+        validators=[
+            event_validators.datetime_type_validator,
+            event_validators.datetime_pass_validator,
+        ],
     )
 
     place: place_models.Place = models.ForeignKey(
         place_models.Place,
         on_delete=models.CASCADE,
         verbose_name="Место провидения",
+        blank=True,
+        null=False,
     )
 
     event_type = models.ForeignKey(
-        event_type_models.EventType,
+        event_type_models.EventBase,
         on_delete=models.CASCADE,
         verbose_name="Тип мероприятия",
         related_name="event",
@@ -114,29 +124,9 @@ class Event(models.Model):
         """
         Валидация уже введенных данных
         """
-        if not self.event_capacity:
-            raise ValidationError("Need visitors")
-        if not isinstance(
-            self.datetime_end,
-            datetime,
-        ) or not isinstance(
-            self.datetime_start,
-            datetime,
-        ):
-            raise ValidationError("Start or end is not correct datetime")
         # проверка начала и конца ивента
         if self.datetime_end < self.datetime_start:
             raise ValidationError("Event end can't be newer the he start")
-        if self.pk is None:
-            # проверка соответствия текущему времени
-            if self.datetime_end < localtime():
-                raise ValidationError(
-                    "Event end can't be older than the current date and time",
-                )
-            if self.datetime_start < localtime():
-                raise ValidationError(
-                    "Event start can't be older than the current date and time",
-                )
         # проверка на кол-во свободных мест в комнате
         events_capacity = (
             Event.event_object.filter(

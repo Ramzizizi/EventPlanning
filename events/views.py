@@ -1,15 +1,19 @@
-from django.core.handlers.wsgi import WSGIRequest
 from django import forms
-from django.shortcuts import redirect, render
-from django.utils.timezone import localtime
 from django.views import View
 from django.db import transaction
+from rest_framework import viewsets
+from django.utils.timezone import localtime
+from django.shortcuts import redirect, render
+from django.core.handlers.wsgi import WSGIRequest
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from events import models as event_models
 from events import forms as event_forms
-from events_type import models as event_type_models
+from events import models as event_models
+from events import serializers as event_serializers
 from events_type import views as event_type_views
 from events_type import forms as event_type_forms
+from events_type import models as event_type_models
+from events_type import serializers as event_type_serializers
 
 
 class Event(View):
@@ -19,7 +23,7 @@ class Event(View):
 
     # инициализация форм
     event_create_form = event_forms.CreateEvent
-    event_type = event_type_views.EventType()
+    event_type = event_type_views.EventBase()
 
     @staticmethod
     def event_sign(request: WSGIRequest, event_id: int):
@@ -31,7 +35,7 @@ class Event(View):
         # добавление посетителя
         event.visitors.add(request.user)
         # перенаправление на главную страницу
-        return redirect("/events/")
+        return redirect("/")
 
     @staticmethod
     def event_out(request: WSGIRequest, event_id: int):
@@ -43,7 +47,7 @@ class Event(View):
         # удаление посетителя
         event.visitors.remove(request.user)
         # перенаправление на главную страницу
-        return redirect("/events/")
+        return redirect("/")
 
     @staticmethod
     def events_list(request: WSGIRequest):
@@ -159,7 +163,9 @@ class Event(View):
         # получения формы
         type_form = self.event_type.event_type_form_create(request)
         # валидация форм
-        if event_create_form.is_valid() and self._is_form_creation_valid(type_form):
+        if event_create_form.is_valid() and self._is_form_creation_valid(
+            type_form,
+        ):
             # создание объекта ивента
             event: event_models.Event = event_create_form.save(commit=False)
             # установка организатора
@@ -177,7 +183,7 @@ class Event(View):
             # сохранение объекта модели
             event.save()
             # возвращение на главную страницу
-            return redirect("/events/")
+            return redirect("/")
 
         # рендер страницы создания ивента
         return render(
@@ -199,3 +205,44 @@ class Event(View):
                 ),
             },
         )
+
+
+class EventViewSet(viewsets.ModelViewSet):
+    list_serializers = {
+        "list": event_serializers.EventShortInfo,
+        "create": event_serializers.EventCreate,
+        "retrieve": event_serializers.EventBase,
+        "partial_update": event_serializers.EventPatch,
+        "meeting": event_type_serializers.Meeting,
+        "conf_call": event_type_serializers.ConfCall,
+        "conference": event_type_serializers.Conference,
+    }
+    queryset = event_models.Event.event_object.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        return self.list_serializers.get(self.action, {})
+
+    def perform_create(self, serializer):
+        event_type_serializer = event_type_serializers.event_type_serializers[
+            serializer.validated_data["event_type"]
+        ](data=serializer.validated_data["event_type_data"])
+        event_type_serializer.is_valid()
+
+        if isinstance(
+            event_type_serializer,
+            event_type_serializers.event_type_serializers[3],
+        ):
+            event_type = event_type_models.Conference.objects.create()
+            event_type.save()
+
+            for theme in event_type_serializer.validated_data["themes"]:
+                theme["event_id"] = event_type.pk
+                theme = event_type_models.Themes.objects.create(**theme)
+                theme.save()
+        else:
+            event_type = event_type_serializer.save()
+
+        serializer.validated_data["event_type"] = event_type
+        serializer.validated_data.pop("event_type_data")
+        serializer.save(organizer=self.request.user)
