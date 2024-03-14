@@ -1,26 +1,7 @@
 from django.urls import path
+
 from events import views as view_events
 
-event_list = view_events.EventViewSet.as_view(
-    {
-        "get": "list",
-        "post": "create",
-    },
-)
-
-event_detail = view_events.EventViewSet.as_view(
-    {
-        "get": "retrieve",
-        "patch": "partial_update",
-        "delete": "destroy",
-    },
-)
-visitors_detail = view_events.EventViewSet.as_view(
-    {
-        "post": "sign_in",
-        "delete": "sign_out",
-    },
-)
 
 # установка рутов для приложения
 urlpatterns = [
@@ -40,7 +21,4 @@ urlpatterns = [
         view_events.Event.as_view(),
         name="event_create",
     ),
-    path("api/events/", event_list),
-    path("api/events/<int:pk>/", event_detail),
-    path("api/events/<int:pk>/visitor/", visitors_detail),
 ]
