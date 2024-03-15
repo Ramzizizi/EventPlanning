@@ -217,6 +217,7 @@ class EventViewSet(viewsets.ModelViewSet):
     }
     queryset = event_models.Event.event_object.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filterset_fields = ["organizer", "place", "event_type"]
 
     def get_serializer_class(self):
         return self.list_serializers.get(self.action, {})
@@ -229,7 +230,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
         if isinstance(
             event_type_serializer,
-            event_type_serializers.event_type_serializers[3],
+            event_type_serializers.Conference,
         ):
             event_type = event_type_models.Conference.objects.create()
             event_type.save()

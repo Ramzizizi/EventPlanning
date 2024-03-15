@@ -1,3 +1,5 @@
+import enum
+
 from rest_framework import serializers
 
 from events_type import models as event_type_models
@@ -43,8 +45,14 @@ class ConfCall(serializers.ModelSerializer):
         fields = ["call_url"]
 
 
+class EventTypes(enum.Enum):
+    Meeting = 1
+    ConfCall = 2
+    Conference = 3
+
+
 event_type_serializers = {
-    1: Meeting,
-    2: ConfCall,
-    3: Conference,
+    EventTypes.Meeting.value: Meeting,
+    EventTypes.ConfCall.value: ConfCall,
+    EventTypes.Conference.value: Conference,
 }

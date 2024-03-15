@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -50,6 +51,8 @@ class PlaceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
+        if self.kwargs["place_type"] not in ["rooms", "auditoriums"]:
+            raise Http404
         return self.list_serializers.get(self.action, {}).get(
             self.kwargs["place_type"],
             {},

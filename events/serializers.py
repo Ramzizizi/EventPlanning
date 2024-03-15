@@ -154,9 +154,9 @@ class EventPatch(EventBase):
 
 
 class EventCreate(EventBase):
-    EVENT_TYPE_CHOICE = ((1, "meeting"), (2, "conf_call"), (3, "conference"))
+    EVENT_TYPE_CHOICES = ((1, "meeting"), (2, "conf_call"), (3, "conference"))
 
-    event_type = serializers.ChoiceField(choices=EVENT_TYPE_CHOICE)
+    event_type = serializers.ChoiceField(choices=EVENT_TYPE_CHOICES)
     event_type_data = serializers.JSONField(
         write_only=True,
         required=True,
@@ -165,20 +165,20 @@ class EventCreate(EventBase):
 
     def validate(self, attrs):
         # проверка начала и конца ивента
-        if not self.is_start_end_valid(**attrs):
+        if not self._is_start_end_valid(**attrs):
             raise serializers.ValidationError(
                 {
                     "datetime_end": "Event end can't be newer the he start",
                 },
             )
             # проверка на кол-во свободных мест в комнате
-        if not self.is_capacity_valid(**attrs):
+        if not self._is_capacity_valid(**attrs):
             raise serializers.ValidationError(
                 {
                     "event_capacity": "Event capacity bigger then place capacity",
                 },
             )
-        if not self.is_event_type_data_valid(**attrs):
+        if not self._is_event_type_data_valid(**attrs):
             raise serializers.ValidationError(
                 {
                     "event_type": "Event type data is not valid",
@@ -187,11 +187,11 @@ class EventCreate(EventBase):
         return attrs
 
     @staticmethod
-    def is_start_end_valid(datetime_start, datetime_end, **_):
+    def _is_start_end_valid(datetime_start, datetime_end, **_):
         return datetime_end >= datetime_start
 
     @staticmethod
-    def is_capacity_valid(
+    def _is_capacity_valid(
         place,
         event_capacity,
         datetime_start,
@@ -214,7 +214,7 @@ class EventCreate(EventBase):
         return (place.seat_capacity - events_capacity) >= event_capacity
 
     @staticmethod
-    def is_event_type_data_valid(event_type, event_type_data, **_):
+    def _is_event_type_data_valid(event_type, event_type_data, **_):
         serializer = event_type_serializers[event_type]
         event_type_date = serializer(data=event_type_data)
         return event_type_date.is_valid()
@@ -238,9 +238,11 @@ class EventCreate(EventBase):
             if check_for_none is None:
                 ret[field.field_name] = None
             else:
-                if isinstance(attribute, Model):
-                    ret[field.field_name] = attribute.pk
-                else:
-                    ret[field.field_name] = field.to_representation(attribute)
+                value = (
+                    attribute.pk
+                    if isinstance(attribute, Model)
+                    else field.to_representation(attribute)
+                )
+                ret[field.field_name] = value
 
         return ret
