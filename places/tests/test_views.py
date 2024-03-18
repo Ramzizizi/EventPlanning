@@ -9,6 +9,10 @@ class PlacesViewTest(TestCase):
 
     fixtures = ["fixture.json"]
 
+    def setUp(self):
+        self.incorrect_auth = "Bearer 1"
+        self.correct_auth = f"Bearer {self._login()}"
+
     def _login(self):
         login_data = {"email": self.email, "password": self.password}
         auth_req = self.client.post("/api/token/", data=login_data)
@@ -25,7 +29,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_places_incorrect_token(self):
         response = self.client.get(
             "/api/places/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -33,7 +37,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_places_correct_token(self):
         response = self.client.get(
             "/api/places/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -50,7 +54,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_rooms_correct_token(self):
         response = self.client.get(
             "/api/places/rooms/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -59,7 +63,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_rooms_incorrect_token(self):
         response = self.client.get(
             "/api/places/rooms/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -76,7 +80,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/rooms/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
         response.data.pop("id")
 
@@ -94,7 +98,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/rooms/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
         response.data.pop("id")
 
@@ -112,7 +116,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/rooms/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 400)
@@ -122,7 +126,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/rooms/",
             data=create_data,
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -133,7 +137,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/rooms/{room_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
             content_type="application/json",
         )
 
@@ -146,7 +150,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/rooms/{room_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
             content_type="application/json",
         )
 
@@ -158,7 +162,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/rooms/{room_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
             content_type="application/json",
         )
 
@@ -168,7 +172,7 @@ class PlacesViewTest(TestCase):
         room_id = place_models.Room.objects.first().pk
         response = self.client.delete(
             f"/api/places/rooms/{room_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 204)
@@ -177,7 +181,7 @@ class PlacesViewTest(TestCase):
         room_id = place_models.Auditorium.objects.first().pk
         response = self.client.delete(
             f"/api/places/rooms/{room_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 404)
@@ -186,7 +190,7 @@ class PlacesViewTest(TestCase):
         room_id = place_models.Room.objects.first().pk
         response = self.client.delete(
             f"/api/places/rooms/{room_id}/",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -202,7 +206,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_auditoriums_correct_token(self):
         response = self.client.get(
             "/api/places/auditoriums/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -211,7 +215,7 @@ class PlacesViewTest(TestCase):
     def test_view_drf_read_all_auditoriums_incorrect_token(self):
         response = self.client.get(
             "/api/places/auditoriums/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -229,7 +233,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/auditoriums/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
         response.data.pop("id")
 
@@ -248,7 +252,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/auditoriums/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
         response.data.pop("id")
 
@@ -269,7 +273,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/auditoriums/",
             data=create_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
         self.assertEqual(response.status_code, 400)
 
@@ -278,7 +282,7 @@ class PlacesViewTest(TestCase):
         response = self.client.post(
             "/api/places/auditoriums/",
             data=create_data,
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
         self.assertEqual(response.status_code, 401)
 
@@ -288,7 +292,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/auditoriums/{auditorium_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
             content_type="application/json",
         )
 
@@ -301,7 +305,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/auditoriums/{auditorium_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
             content_type="application/json",
         )
 
@@ -313,7 +317,7 @@ class PlacesViewTest(TestCase):
         response = self.client.patch(
             f"/api/places/auditoriums/{auditorium_id}/",
             data=patch_data,
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
             content_type="application/json",
         )
 
@@ -323,7 +327,7 @@ class PlacesViewTest(TestCase):
         auditorium_id = place_models.Auditorium.objects.first().pk
         response = self.client.delete(
             f"/api/places/auditorium/{auditorium_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 204)
@@ -332,7 +336,7 @@ class PlacesViewTest(TestCase):
         auditorium_id = place_models.Room.objects.first().pk
         response = self.client.delete(
             f"/api/places/auditorium/{auditorium_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 404)
@@ -341,7 +345,7 @@ class PlacesViewTest(TestCase):
         auditorium_id = place_models.Auditorium.objects.first().pk
         response = self.client.delete(
             f"/api/places/auditorium/{auditorium_id}/",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)

@@ -64,6 +64,10 @@ class EventDRFViewTest(TestCase):
         ],
     }
 
+    def setUp(self):
+        self.incorrect_auth = "Bearer 1"
+        self.correct_auth = f"Bearer {self._login()}"
+
     def _login(self):
         login_data = {"email": self.email, "password": self.password}
         auth_req = self.client.post("/api/token/", data=login_data)
@@ -80,7 +84,7 @@ class EventDRFViewTest(TestCase):
     def test_read_all_events_correct_token(self):
         response = self.client.get(
             "/api/events/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -89,7 +93,7 @@ class EventDRFViewTest(TestCase):
     def test_read_all_events_incorrect_token(self):
         response = self.client.get(
             "/api/events/",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -102,16 +106,12 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         del response.data["id"]
         del response.data["event_type"]
-        create_data.update(
-            {
-                "organizer": 1,
-            },
-        )
+        create_data.update({"organizer": 1})
         del create_data["event_type"]
         del create_data["event_type_data"]
 
@@ -120,16 +120,12 @@ class EventDRFViewTest(TestCase):
 
     def test_post_event_meeting_incorrect_data(self):
         create_data = deepcopy(self.create_data_meeting)
-        create_data.update(
-            {
-                "event_type": 5,
-            },
-        )
+        create_data.update({"event_type": 5})
         response = self.client.post(
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 400)
@@ -140,7 +136,7 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -149,7 +145,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.Meeting.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 204)
@@ -158,7 +154,7 @@ class EventDRFViewTest(TestCase):
         event_id = 1000
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 404)
@@ -167,7 +163,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.Meeting.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -180,16 +176,12 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         del response.data["id"]
         del response.data["event_type"]
-        create_data.update(
-            {
-                "organizer": 1,
-            },
-        )
+        create_data.update({"organizer": 1})
         del create_data["event_type"]
         del create_data["event_type_data"]
 
@@ -198,16 +190,12 @@ class EventDRFViewTest(TestCase):
 
     def test_post_event_conf_call_incorrect_data(self):
         create_data = deepcopy(self.create_data_conf_call)
-        create_data.update(
-            {
-                "event_type": 5,
-            },
-        )
+        create_data.update({"event_type": 5})
         response = self.client.post(
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 400)
@@ -218,7 +206,7 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -227,7 +215,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.ConfCall.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 204)
@@ -236,7 +224,7 @@ class EventDRFViewTest(TestCase):
         event_id = 1000
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 404)
@@ -245,7 +233,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.ConfCall.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -258,16 +246,12 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         del response.data["id"]
         del response.data["event_type"]
-        create_data.update(
-            {
-                "organizer": 1,
-            },
-        )
+        create_data.update({"organizer": 1})
         del create_data["event_type"]
         del create_data["event_type_data"]
 
@@ -276,16 +260,12 @@ class EventDRFViewTest(TestCase):
 
     def test_post_event_conference_incorrect_data(self):
         create_data = deepcopy(self.create_data_conference)
-        create_data.update(
-            {
-                "event_type": 5,
-            },
-        )
+        create_data.update({"event_type": 5})
         response = self.client.post(
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 400)
@@ -296,7 +276,7 @@ class EventDRFViewTest(TestCase):
             "/api/events/",
             data=create_data,
             content_type="application/json",
-            HTTP_AUTHORIZATION=f"Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
@@ -305,7 +285,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.Conference.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 204)
@@ -314,7 +294,7 @@ class EventDRFViewTest(TestCase):
         event_id = 1000
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION=f"Bearer {self._login()}",
+            HTTP_AUTHORIZATION=self.correct_auth,
         )
 
         self.assertEqual(response.status_code, 404)
@@ -323,7 +303,7 @@ class EventDRFViewTest(TestCase):
         event_id = event_type_models.Conference.objects.first().pk
         response = self.client.delete(
             f"/api/events/{event_id}/",
-            HTTP_AUTHORIZATION="Bearer 1",
+            HTTP_AUTHORIZATION=self.incorrect_auth,
         )
 
         self.assertEqual(response.status_code, 401)
