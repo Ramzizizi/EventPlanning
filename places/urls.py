@@ -11,7 +11,7 @@ places_list = place_views.PlaceViewSet.as_view(
     {
         "get": "list",
         "post": "create",
-    }
+    },
 )
 
 places_detail = place_views.PlaceViewSet.as_view(

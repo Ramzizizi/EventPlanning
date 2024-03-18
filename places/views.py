@@ -51,7 +51,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
-        if self.kwargs["place_type"] not in ["rooms", "auditoriums"]:
+        if self.kwargs["place_type"] not in {"rooms", "auditoriums"}:
             raise Http404
         return self.list_serializers.get(self.action, {}).get(
             self.kwargs["place_type"],

@@ -2,8 +2,6 @@ from django import forms
 
 from events_type import models as event_type_models
 
-from django.forms.models import BaseModelFormSet
-
 
 class CreateThemeConference(forms.ModelForm):
 
