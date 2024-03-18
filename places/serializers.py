@@ -1,12 +1,14 @@
 from rest_framework import serializers
 
 from places import models as place_models
+from places import validators as place_validators
 
 
 class PlaceBase(serializers.ModelSerializer):
     seat_capacity = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
     name = serializers.CharField(
         allow_null=False,
@@ -34,10 +36,12 @@ class RoomBase(PlaceBase):
     sofa_count = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
     seat_count = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
 
     class Meta:
@@ -61,14 +65,17 @@ class AuditoriumBase(PlaceBase):
     mico_count = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
     projects_count = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
     entrances_count = serializers.IntegerField(
         default=0,
         required=False,
+        validators=[place_validators.positive_integer_validator],
     )
 
     class Meta:

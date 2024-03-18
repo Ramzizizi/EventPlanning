@@ -1,5 +1,7 @@
 from django.db import models
 
+from places import validators as place_validators
+
 
 class ActiveManager(models.Manager):
 
@@ -13,9 +15,10 @@ class Place(models.Model):
     """
 
     # базовые параметры места
-    seat_capacity = models.IntegerField(
+    seat_capacity = models.PositiveIntegerField(
         default=0,
         verbose_name="Вместимость",
+        validators=[place_validators.positive_integer_validator],
     )
     name = models.CharField(
         max_length=100,
@@ -39,13 +42,15 @@ class Room(Place):
     """
 
     # добавление полей
-    sofa_count = models.IntegerField(
+    sofa_count = models.PositiveIntegerField(
         default=0,
         verbose_name="Количество диванов",
+        validators=[place_validators.positive_integer_validator],
     )
-    seat_count = models.IntegerField(
+    seat_count = models.PositiveIntegerField(
         default=0,
         verbose_name="Сидячих мест",
+        validators=[place_validators.positive_integer_validator],
     )
 
     class Meta:
@@ -59,17 +64,20 @@ class Auditorium(Place):
     """
 
     # добавление полей
-    mico_count = models.IntegerField(
+    mico_count = models.PositiveIntegerField(
         default=0,
         verbose_name="Количеств микрофонов",
+        validators=[place_validators.positive_integer_validator],
     )
-    projects_count = models.IntegerField(
+    projects_count = models.PositiveIntegerField(
         default=0,
         verbose_name="Количество проекторов",
+        validators=[place_validators.positive_integer_validator],
     )
-    entrances_count = models.IntegerField(
+    entrances_count = models.PositiveIntegerField(
         default=0,
         verbose_name="Количество входов",
+        validators=[place_validators.positive_integer_validator],
     )
 
     class Meta:
