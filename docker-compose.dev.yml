@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  django:
+    build: .
+    container_name: event_planning
+    command: sh -c "python manage.py migrate &&
+                    python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/Users/user/PycharmProjects/event_planning
+    environment:
+      - DEBUG=1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgdb
+
+  pgdb:
+    container_name: pgdb
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    command: ['python', '-m', 'celery', '-A', 'event_planning', 'worker', '-l', 'info']
+    env_file:
+      - .env
+    volumes:
+      - .:/Users/user/PycharmProjects/event_planning
+    depends_on:
+      - pgdb
+      - redis

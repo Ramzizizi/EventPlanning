@@ -33,7 +33,7 @@ def debug_task():
                 datetime_start__lte=localtime()
                 + timedelta(hours=PRE_EVENT_TIME_SECONDS),
             ).
-            order_by("start").
+            order_by("datetime_start").
             all()
         )
         logger.info(f"Find events: {events}")
