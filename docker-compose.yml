@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  django:
+    build: .
+    container_name: event_planning
+    command: sh -c "python manage.py collectstatic ||
+                    python manage.py migrate &&
+                    gunicorn event_planning.wsgi:application --bind 0.0.0.0:8007"
+    volumes:
+      - .:/Users/user/PycharmProjects/event_planning
+      - static_volume:/Users/user/PycharmProjects/event_planning/static/
+    environment:
+      - DEBUG=0
+    depends_on:
+      - pgdb
+
+  pgdb:
+    container_name: pgdb
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    command: ['python', '-m', 'celery', '-A', 'event_planning', 'worker', '-l', 'info']
+    env_file:
+      - .env
+    volumes:
+      - .:/Users/user/PycharmProjects/event_planning
+    depends_on:
+      - pgdb
+      - redis
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/Users/user/PycharmProjects/event_planning/static/
+    ports:
+      - "80:80"
+    depends_on:
+      - django
+
+volumes:
+  static_volume:
